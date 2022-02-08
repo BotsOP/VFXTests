@@ -32,10 +32,8 @@ public class DissolveController : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("hoi");
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("hoi2");
             StartCoroutine(Dissolve());
         }
     }
