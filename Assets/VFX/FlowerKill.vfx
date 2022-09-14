@@ -134,9 +134,9 @@ MonoBehaviour:
   uiBounds:
     serializedVersion: 2
     x: -1049
-    y: -782
-    width: 7191
-    height: 3048
+    y: -723
+    width: 7193
+    height: 2982
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -525,7 +525,7 @@ MonoBehaviour:
   stripCapacity: 16
   particlePerStripCount: 16
   needsComputeBounds: 1
-  boundsSettingMode: 0
+  boundsMode: 0
   m_Space: 0
 --- !u!114 &8926484042661614580
 MonoBehaviour:
@@ -15882,7 +15882,7 @@ MonoBehaviour:
   stripCapacity: 16
   particlePerStripCount: 16
   needsComputeBounds: 0
-  boundsSettingMode: 1
+  boundsMode: 1
   m_Space: 0
 --- !u!114 &8926484042661615550
 MonoBehaviour:
@@ -21556,7 +21556,7 @@ MonoBehaviour:
   stripCapacity: 16
   particlePerStripCount: 16
   needsComputeBounds: 0
-  boundsSettingMode: 1
+  boundsMode: 1
   m_Space: 0
 --- !u!114 &8926484042661615933
 MonoBehaviour:
@@ -25872,7 +25872,7 @@ MonoBehaviour:
   stripCapacity: 16
   particlePerStripCount: 16
   needsComputeBounds: 0
-  boundsSettingMode: 1
+  boundsMode: 1
   m_Space: 0
 --- !u!114 &8926484042661616242
 MonoBehaviour:
