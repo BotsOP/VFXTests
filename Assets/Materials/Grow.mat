@@ -15,14 +15,15 @@ MonoBehaviour:
   version: 5
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Grow
   m_Shader: {fileID: -6465566751694194690, guid: c51c1852bdb14bd47bf68111624ea94c, type: 3}
-  m_ShaderKeywords: 
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -52,7 +53,7 @@ Material:
     m_Floats:
     - _Clip: 0.88
     - _EmissionStrength: 0
-    - _Grow: 1
+    - _Grow: 0.76
     - _Metallic: 0
     - _QueueControl: 0
     - _QueueOffset: 0
