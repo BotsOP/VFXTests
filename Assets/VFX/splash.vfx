@@ -1136,7 +1136,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614661}
   m_ExposedName: Size
   m_Exposed: 1
-  m_Order: 4
+  m_Order: 6
   m_Category: Sprite
   m_Min:
     m_Type:
@@ -3785,7 +3785,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614931}
   m_ExposedName: Gradient
   m_Exposed: 1
-  m_Order: 3
+  m_Order: 4
   m_Category: Sprite
   m_Min:
     m_Type:
@@ -3972,7 +3972,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614951}
   m_ExposedName: dissolve
   m_Exposed: 1
-  m_Order: 2
+  m_Order: 3
   m_Category: Sprite
   m_Min:
     m_Type:
@@ -4810,7 +4810,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614975}
   m_ExposedName: SplashArray
   m_Exposed: 0
-  m_Order: 5
+  m_Order: 7
   m_Category: Sprite
   m_Min:
     m_Type:
@@ -11169,7 +11169,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615398}
   m_ExposedName: AlphaParticleLife
   m_Exposed: 1
-  m_Order: 1
+  m_Order: 2
   m_Category: 
   m_Min:
     m_Type:
@@ -11412,7 +11412,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615411}
   m_ExposedName: ColorParticle
   m_Exposed: 1
-  m_Order: 3
+  m_Order: 5
   m_Category: 
   m_Min:
     m_Type:
@@ -11919,7 +11919,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615426}
   m_ExposedName: AmountParticles
   m_Exposed: 1
-  m_Order: 6
+  m_Order: 8
   m_Category: 
   m_Min:
     m_Type:
@@ -16053,7 +16053,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615562}
   m_ExposedName: Splash1
   m_Exposed: 1
-  m_Order: 6
+  m_Order: 9
   m_Category: Sprite
   m_Min:
     m_Type:
@@ -16133,7 +16133,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615564}
   m_ExposedName: Splash2
   m_Exposed: 1
-  m_Order: 7
+  m_Order: 10
   m_Category: Sprite
   m_Min:
     m_Type:
@@ -16213,7 +16213,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615566}
   m_ExposedName: Splash3
   m_Exposed: 1
-  m_Order: 8
+  m_Order: 11
   m_Category: Sprite
   m_Min:
     m_Type:
