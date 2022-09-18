@@ -5,6 +5,7 @@ Shader "Custom/LitShader"
         _MainTex ("Texture", 2D) = "white" {}
     	_Color ("Color", Color) = (0.25, 0.5, 0.5, 1)
 	    _Gloss ("Gloss", Range(0, 2)) = 1
+	    _TimeScale ("TimeScale", Range(0, 10)) = 1
 
         _WaveA ("Wave A (dir, steepness, wavelength)", Vector) = (1,0,0.5,10)
     	_WaveB ("Wave B", Vector) = (0,1,0.25,20)
@@ -63,6 +64,7 @@ Shader "Custom/LitShader"
             float4 _MainTex_ST;
             float4 _Color;
             float _Gloss;
+            float _TimeScale;
 
             float4 _WaveA;
             float4 _WaveB;
@@ -77,7 +79,7 @@ Shader "Custom/LitShader"
 			    float k = 2 * PI / wavelength;
 				float c = sqrt(9.8 / k);
 				float2 d = normalize(wave.xy);
-				float f = k * (dot(d, p.xz) - c * _Time.y);
+				float f = k * (dot(d, p.xz) - c * (_Time.y / _TimeScale));
 				float a = steepness / k;
 				
 				//p.x += d.x * (a * cos(f));
@@ -142,8 +144,7 @@ Shader "Custom/LitShader"
             	specular = pow(specular, specularExponent);
             	
                 //fixed4 col = tex2D(_MainTex, i.uv);
-            	float4 col = _Color;
-            	
+
                 return float4(diffuse + specular, 1);
             }
             ENDHLSL

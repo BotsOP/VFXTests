@@ -26,14 +26,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Gloss: 1
+    - _Gloss: 0.96
     - _Speed: 1
     - _Steepness: 0.2
+    - _TimeScale: 4.8
     - _Wavelength: 10
     m_Colors:
     - _Color: {r: 0.29043543, g: 0.8396226, b: 0.8396226, a: 1}
     - _Direction: {r: 1, g: 0.49, b: 0, a: 0}
-    - _WaveA: {r: 1, g: 1, b: 0.01, a: 60}
-    - _WaveB: {r: 1, g: 0.6, b: 0.01, a: 31}
-    - _WaveC: {r: 1, g: 1.3, b: 0.01, a: 18}
+    - _WaveA: {r: 1, g: 1, b: 0.3, a: 0.6}
+    - _WaveB: {r: 1, g: 0.41, b: 0.2, a: 0.4}
+    - _WaveC: {r: 1, g: 1.3, b: 0.2, a: 0.3}
   m_BuildTextureStacks: []
