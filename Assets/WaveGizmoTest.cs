@@ -37,7 +37,37 @@ public class WaveGizmoTest : MonoBehaviour
             Gizmos.DrawLine(wavePos, tangent + wavePos);
             Gizmos.color = Color.green;
             Gizmos.DrawLine(wavePos, normal + wavePos);
+        }
+        
+        for (int i = 0; i < 10; i++)
+        {
+            Gizmos.color = Color.black;
+            Vector3 anchorPos = new Vector3(transform.position.x + (1 * i) + 10, transform.position.y, transform.position.z);
+            Gizmos.DrawSphere(anchorPos, 0.1f);
 
+            float k = 2 * Mathf.PI / wavelength;
+            float f = k * (anchorPos.x - speed * Time.time);
+            float a = steepness / k;
+            
+            float x = a * (float)Math.Sin(f);
+            float y = a * (float)Math.Cos(f);
+            
+            Vector3 tangent = Vector3.Normalize(new Vector3(
+                                                    (float)(steepness * Math.Cos(f)),
+                                                    (float)(1 - steepness * Math.Sin(f)),
+                                                    0
+                                                ));
+            Vector3 normal = new Vector3(-tangent.x, tangent.y, 0);
+
+            Gizmos.color = Color.cyan;
+            Vector3 wavePos = new Vector3(x + anchorPos.x, y + anchorPos.y, anchorPos.z);
+            Gizmos.DrawSphere(wavePos, 0.1f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(anchorPos, wavePos);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(wavePos, tangent + wavePos);
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(wavePos, normal + wavePos);
         }
     }
     

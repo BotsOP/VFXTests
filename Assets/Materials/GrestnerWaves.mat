@@ -32,7 +32,7 @@ Material:
     - _TimeScale: 4.8
     - _Wavelength: 10
     m_Colors:
-    - _Color: {r: 0.29043543, g: 0.8396226, b: 0.8396226, a: 1}
+    - _Color: {r: 0.29019612, g: 0.5713235, b: 0.8392157, a: 1}
     - _Direction: {r: 1, g: 0.49, b: 0, a: 0}
     - _WaveA: {r: 1, g: 1, b: 0.3, a: 0.6}
     - _WaveB: {r: 1, g: 0.41, b: 0.2, a: 0.4}
