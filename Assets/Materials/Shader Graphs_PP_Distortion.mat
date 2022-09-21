@@ -62,7 +62,7 @@ Material:
     - _ZTest: 4
     - _ZWrite: 0
     - _ZWriteControl: 0
-    - _distance: 5.1
+    - _distance: 5.8
     - _width: 0.5
     m_Colors: []
   m_BuildTextureStacks: []
