@@ -1,0 +1,48 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel TriangleParticle
+
+RWByteAddressBuffer bufVertices;
+RWByteAddressBuffer bufIndices;
+StructuredBuffer<float3> bufOldVertices;
+
+float triDist;
+float trilerp;
+float3 target;
+
+[numthreads(1,1,1)]
+void TriangleParticle (uint3 id : SV_DispatchThreadID)
+{
+    int index1 = bufIndices.Load((id.x * 3) * 2);
+    int index2 = bufIndices.Load((id.x * 3 + 1) * 2);
+    int index3 = bufIndices.Load((id.x * 3 + 2) * 2);
+    
+    // float3 tri1 = asfloat(bufVertices.Load3(index1 * 40));
+    // float3 tri2 = asfloat(bufVertices.Load3(index2 * 40));
+    // float3 tri3 = asfloat(bufVertices.Load3(index3 * 40));
+
+    float3 tri1 = bufOldVertices[index1];
+    float3 tri2 = bufOldVertices[index2];
+    float3 tri3 = bufOldVertices[index3];
+    
+    float3 nor1 = asfloat(bufVertices.Load3(index1 * 40) + 12);
+    float3 nor2 = asfloat(bufVertices.Load3(index2 * 40) + 12);
+    float3 nor3 = asfloat(bufVertices.Load3(index3 * 40) + 12);
+    
+    float3 triDir = normalize((normalize(nor1) + normalize(nor2) + normalize(nor3)) / 3);
+    
+    // float3 newTri1 = tri1 + triDir * triDist;
+    // float3 newTri2 = tri2 + triDir * triDist;
+    // float3 newTri3 = tri3 + triDir * triDist;
+
+    float3 newTri1 = lerp(tri1, float3(0, 0, 0), trilerp);
+    float3 newTri2 = lerp(tri2, float3(0, 0, 0), trilerp);
+    float3 newTri3 = lerp(tri3, float3(0, 0, 0), trilerp);
+    
+    bufVertices.Store3(index1 * 40, asuint(newTri1));
+    bufVertices.Store3(index2 * 40, asuint(newTri2));
+    bufVertices.Store3(index3 * 40, asuint(newTri3));
+
+    // bufVertices.Store3(index1 * 40, asuint(float3(trilerp, id.x, id.x)));
+    // bufVertices.Store3(index2 * 40, asuint(float3(trilerp, id.x, id.x)));
+    // bufVertices.Store3(index3 * 40, asuint(float3(trilerp, id.x, id.x)));
+}
