@@ -74,7 +74,7 @@ Material:
     - _Glow: {r: 0, g: 3.9789958, b: 4.594794, a: 1}
     - _NoiseTile: {r: 1, g: 5, b: 0, a: 0}
     - _OriginOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _SpawnPoint: {r: 5.18, g: 0.26699996, b: 0.32, a: 0}
+    - _SpawnPoint: {r: 0.267, g: 1.203, b: 1.712, a: 0}
     - _TargetPos: {r: 4.68, g: 1.497, b: -3.122, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &8980258179721763041
