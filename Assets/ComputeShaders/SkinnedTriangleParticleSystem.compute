@@ -5,11 +5,77 @@ RWByteAddressBuffer bufSkinnedVertices;
 RWByteAddressBuffer bufVertices;
 RWByteAddressBuffer bufIndices;
 StructuredBuffer<float3> bufOldVertices;
+RWStructuredBuffer<float3> triangleVelocity;
 
 float triDist;
-float trilerp;
+float triLerp;
 float time;
+float deltaTime;
+bool spawn;
+bool reset;
 float3 target;
+
+float3 hash33(float3 p3)
+{
+    p3 = frac(p3 * float3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yxz+33.33);
+    return frac((p3.xxy + p3.yxx)*p3.zyx);
+}
+
+// [numthreads(64,1,1)]
+// void TriangleParticle (uint3 id : SV_DispatchThreadID)
+// {
+//     int index1 = bufIndices.Load((id.x * 3) * 4);
+//     int index2 = bufIndices.Load((id.x * 3 + 1) * 4);
+//     int index3 = bufIndices.Load((id.x * 3 + 2) * 4);
+//     
+//     float3 animTri1 = asfloat(bufSkinnedVertices.Load3(index1 * 40));
+//     float3 animTri2 = asfloat(bufSkinnedVertices.Load3(index2 * 40));
+//     float3 animTri3 = asfloat(bufSkinnedVertices.Load3(index3 * 40));
+//
+//     float3 tri1 = asfloat(bufVertices.Load3(index1 * 40));
+//     float3 tri2 = asfloat(bufVertices.Load3(index2 * 40));
+//     float3 tri3 = asfloat(bufVertices.Load3(index3 * 40));
+//
+//     float3 animCenterTri = (animTri1 + animTri2 + animTri3) / 3;
+//     float3 centerTri = (tri1 + tri2 +tri3) / 3;
+//     
+//     float3 newTarget = spawn ? animCenterTri : target;
+//
+//     float3 centerVelocity = newTarget - centerTri;
+//     float distToTarget = distance(centerTri, newTarget);
+//     
+//     centerVelocity = centerVelocity / (distToTarget * 5) * triDist;
+//     triangleVelocity[id.x] += centerVelocity;
+//     float3 velocity = triangleVelocity[id.x];
+//
+//     if(distToTarget < 0.1)
+//     {
+//         triangleVelocity[id.x] = float3(0, 0, 0);
+//         centerTri = newTarget;
+//     }
+//
+//     centerTri += velocity * deltaTime;
+//     
+//     float3 tri1Offset = animTri1 - animCenterTri;
+//     float3 tri2Offset = animTri2 - animCenterTri;
+//     float3 tri3Offset = animTri3 - animCenterTri;
+//     
+//     float3 newTri1 = centerTri + tri1Offset;
+//     float3 newTri2 = centerTri + tri2Offset;
+//     float3 newTri3 = centerTri + tri3Offset;
+//
+//     if(reset)
+//     {
+//         bufVertices.Store3(index1 * 40, asuint(animTri1));
+//         bufVertices.Store3(index2 * 40, asuint(animTri2));
+//         bufVertices.Store3(index3 * 40, asuint(animTri3));
+//         return;
+//     }
+//     bufVertices.Store3(index1 * 40, asuint(newTri1));
+//     bufVertices.Store3(index2 * 40, asuint(newTri2));
+//     bufVertices.Store3(index3 * 40, asuint(newTri3));
+// }
 
 [numthreads(64,1,1)]
 void TriangleParticle (uint3 id : SV_DispatchThreadID)
@@ -18,14 +84,33 @@ void TriangleParticle (uint3 id : SV_DispatchThreadID)
     int index2 = bufIndices.Load((id.x * 3 + 1) * 4);
     int index3 = bufIndices.Load((id.x * 3 + 2) * 4);
     
-    float3 tri1 = asfloat(bufSkinnedVertices.Load3(index1 * 40));
-    float3 tri2 = asfloat(bufSkinnedVertices.Load3(index2 * 40));
-    float3 tri3 = asfloat(bufSkinnedVertices.Load3(index3 * 40));
+    float3 animTri1 = asfloat(bufSkinnedVertices.Load3(index1 * 40));
+    float3 animTri2 = asfloat(bufSkinnedVertices.Load3(index2 * 40));
+    float3 animTri3 = asfloat(bufSkinnedVertices.Load3(index3 * 40));
+
+    float3 animCenterTri = (animTri1 + animTri2 + animTri3) / 3;
+
+    float triLerp4 = triLerp * 4;
+    float newLerp = animCenterTri.y - 1 + triLerp4;
+    newLerp = saturate(newLerp);
     
-    float3 newTri1 = tri1 + float3(0, trilerp, 0);
-    float3 newTri2 = tri2 + float3(0, trilerp, 0);
-    float3 newTri3 = tri3 + float3(0, trilerp, 0);
+    float3 randPos = normalize(float3(0.5, 0.5, 0.5) - hash33(float3(index1, index2, index3)));
+    randPos = float3(randPos.x, 0, randPos.z) * triDist;
+    randPos += float3(0, 2, 0);
+
+    //float3 centerTri = (tri1 + tri2 +tri3) / 3;
     
+    float3 newTri1 = lerp(animTri1, randPos + animTri1 - float3(0, animTri1.y, 0), newLerp);
+    float3 newTri2 = lerp(animTri2, randPos + animTri2 - float3(0, animTri2.y, 0), newLerp);
+    float3 newTri3 = lerp(animTri3, randPos + animTri3 - float3(0, animTri3.y, 0), newLerp);
+
+    if(reset)
+    {
+        bufVertices.Store3(index1 * 40, asuint(animTri1));
+        bufVertices.Store3(index2 * 40, asuint(animTri2));
+        bufVertices.Store3(index3 * 40, asuint(animTri3));
+        return;
+    }
     bufVertices.Store3(index1 * 40, asuint(newTri1));
     bufVertices.Store3(index2 * 40, asuint(newTri2));
     bufVertices.Store3(index3 * 40, asuint(newTri3));

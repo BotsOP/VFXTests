@@ -3717,7 +3717,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761157366}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.878, z: 1.052}
+  m_LocalPosition: {x: -0.057, y: 2.727, z: -0.027}
   m_LocalScale: {x: 0.18683, y: 0.18683, z: 0.18683}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3744,7 +3744,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761157366}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -10415,7 +10415,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100002, guid: efe9381559c516743bd05cef82f39ebb, type: 3}
+  - {fileID: 2100000, guid: c6dbc2f7c6db4a842bc4fff1aa8029c2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -17538,9 +17538,11 @@ MonoBehaviour:
   computeShader: {fileID: 7200000, guid: e510ab463eab5ab468ddfc7a556dc4aa, type: 3}
   skinnedMeshRenderer: {fileID: 2371013546100330558}
   meshFilter: {fileID: 2009994045}
-  triangleDist: 0
   targetTransform: {fileID: 761157367}
+  triangleDist: 2
   triangleLerp: 0
+  spawn: 0
+  reset: 0
 --- !u!95 &4452086932720804275
 Animator:
   serializedVersion: 4
