@@ -23,6 +23,7 @@ public class SciFiSpawn2 : MonoBehaviour
     
     private Mesh charMesh;
     private Transform meshTransform;
+    private Camera mainCam;
     
     private GraphicsBuffer gpuVertices;
     private GraphicsBuffer gpuSkinnedVertices;
@@ -50,6 +51,8 @@ public class SciFiSpawn2 : MonoBehaviour
         }
         
         triangleVelocity.SetData(randomDir);
+
+        mainCam = Camera.main;
         
         SetMesh();
     }
@@ -73,15 +76,18 @@ public class SciFiSpawn2 : MonoBehaviour
             UpdateChar();
         }
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        
+            if (Physics.Raycast(ray, out hit)) {
+                Transform objectHit = hit.transform;
+            }
+        }
+
         charMeshTransform.position = animTransform.position;
         charMeshTransform.rotation = animTransform.rotation;
-        
-        
-        
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     Debug.Log($"{i} = {GetPositionFromVertex(i * 1000)}");
-        // }
     }
 
     private void UpdateChar()
@@ -107,6 +113,7 @@ public class SciFiSpawn2 : MonoBehaviour
         computeShader.SetBuffer(kernelIndex, "bufVertices", gpuVertices);
         computeShader.SetBuffer(kernelIndex, "bufIndices", gpuIndices);
         //computeShader.SetBuffer(0, "triangleVelocity", triangleVelocity);
+        
         
         computeShader.Dispatch(kernelIndex, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
         

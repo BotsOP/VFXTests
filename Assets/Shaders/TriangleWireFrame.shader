@@ -98,7 +98,6 @@ Shader "Unlit/WireframeFixedWidth"
 
         Pass
         {
-            // Removes the back facing triangles.
             Name "ForwardLit"
             Tags { "LightMode" = "UniversalForward" }
 

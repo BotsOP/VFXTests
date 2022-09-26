@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb5e4193615d8464a82ea935f90494a0, type: 3}
+  m_Name: EasyColliderPreferences
+  m_EditorClassIdentifier: 
+  VHACDResFloat: 13.287712
+  AutoIncludeChildSkinnedMeshes: 1
+  BoxSelectPlusKey: 97
+  BoxSelectMinusKey: 115
+  CapsuleColliderMethod: 1
+  CommonScalingMultiplier: 1
+  CreatedColliderDisabled: 1
+  CreateFromPreviewKey: 96
+  CylinderNumberOfSides: 16
+  DisplayTips: 1
+  DisplayVerticesColour: {r: 0, g: 0, b: 1, a: 1}
+  DisplayVerticesScaling: 0.05
+  ForceFocusScene: 0
+  GizmoType: 1
+  HoverVertColour: {r: 0, g: 1, b: 1, a: 1}
+  HoverVertScaling: 0.1
+  MergeCollidersRoundnessAccuracy: 10
+  MeshColliderMethod: 0
+  OverlapSelectedVertColour: {r: 1, g: 0, b: 0, a: 1}
+  OverlapSelectedVertScale: 0.1
+  PointSelectKeyCode: 98
+  PreviewColliderType: 0
+  PreviewDrawColor: {r: 0, g: 1, b: 1, a: 1}
+  RaycastDelayTime: 0.1
+  RenderPointType: 0
+  RemoveMergedColliders: 1
+  RotatedOnSelectedLayer: 1
+  SaveConvexHullAsAsset: 1
+  SaveConvexHullMeshAtSelected: 1
+  SaveConvexHullPath: Assets/EasyColliderEditor/Scripts/
+  SaveConvexHullSuffix: _ConvexHull_
+  SelectedVertColour: {r: 0, g: 1, b: 0, a: 1}
+  SelectedVertScaling: 0.1
+  SkinnedMeshColliderType: 1
+  SphereColliderMethod: 2
+  UseDensityScale: 1
+  UseFixedGizmoScale: 1
+  UseMouseClickSelection: 0
+  VertexSnapMethod: 2
+  VertSelectKeyCode: 118
+  VHACDPreview: 1

@@ -27,10 +27,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _WireframeWidth: 1.98
-    - _dist: 0.074
+    - _dist: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _WireframeBackColour: {r: 1, g: 1, b: 1, a: 1}
-    - _WireframeFrontColour: {r: 1, g: 0.029125545, b: 0, a: 1}
+    - _WireframeFrontColour: {r: 0, g: 0.61619616, b: 1, a: 1}
     - _targetPos: {r: -0.24208102, g: 0.6190219, b: 0.24166554, a: 0}
   m_BuildTextureStacks: []
