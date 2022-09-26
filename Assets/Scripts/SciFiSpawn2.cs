@@ -8,13 +8,18 @@ using UnityEngine.Rendering;
 public class SciFiSpawn2 : MonoBehaviour
 {
     [SerializeField] private ComputeShader computeShader;
+    [SerializeField] private Material meshMat;
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private Transform targetTransform;
+    [SerializeField] private Transform animTransform;
+    [SerializeField] private Transform charMeshTransform;
     [SerializeField][Range(0, 2f)] private float triangleDist;
     [SerializeField][Range(0, 1)] private float triangleLerp;
+    [SerializeField][Range(0, 1)] private float cutOffDist;
     [SerializeField] private bool spawn;
     [SerializeField] private bool reset;
+    [SerializeField] private int kernelIndex;
     
     private Mesh charMesh;
     private Transform meshTransform;
@@ -23,7 +28,15 @@ public class SciFiSpawn2 : MonoBehaviour
     private GraphicsBuffer gpuSkinnedVertices;
     private GraphicsBuffer gpuIndices;
     private GraphicsBuffer triangleVelocity;
-    
+
+    private void OnDrawGizmos()
+    {
+        Vector4 target = meshFilter.transform.worldToLocalMatrix.MultiplyPoint3x4(targetTransform.position);
+        
+        meshMat.SetVector("_targetPos", target);
+        meshMat.SetFloat("_dist", cutOffDist);
+    }
+
     private void OnEnable()
     {
         charMesh = meshFilter.sharedMesh;
@@ -43,6 +56,8 @@ public class SciFiSpawn2 : MonoBehaviour
     
     void OnDisable()
     {
+        gpuSkinnedVertices?.Dispose();
+        gpuSkinnedVertices = null;
         gpuVertices?.Dispose();
         gpuVertices = null;
         gpuIndices?.Dispose();
@@ -57,6 +72,11 @@ public class SciFiSpawn2 : MonoBehaviour
         {
             UpdateChar();
         }
+
+        charMeshTransform.position = animTransform.position;
+        charMeshTransform.rotation = animTransform.rotation;
+        
+        
         
         // for (int i = 0; i < 10; i++)
         // {
@@ -72,20 +92,23 @@ public class SciFiSpawn2 : MonoBehaviour
 
         Vector4 target = meshTransform.worldToLocalMatrix.MultiplyPoint3x4(targetTransform.position);
         
+        meshMat.SetVector("_targetPos", target);
+        
         computeShader.SetFloat("triDist", triangleDist);
         computeShader.SetFloat("triLerp", triangleLerp);
         computeShader.SetFloat("time", Time.time);
         computeShader.SetFloat("deltaTime", Time.deltaTime);
+        computeShader.SetFloat("VERTEX_STRIDE", 44);
         computeShader.SetBool("spawn", spawn);
         computeShader.SetBool("reset", reset);
         computeShader.SetVector("target", target);
         
-        computeShader.SetBuffer(0, "bufSkinnedVertices", gpuSkinnedVertices);
-        computeShader.SetBuffer(0, "bufVertices", gpuVertices);
-        computeShader.SetBuffer(0, "bufIndices", gpuIndices);
-        computeShader.SetBuffer(0, "triangleVelocity", triangleVelocity);
+        computeShader.SetBuffer(kernelIndex, "bufSkinnedVertices", gpuSkinnedVertices);
+        computeShader.SetBuffer(kernelIndex, "bufVertices", gpuVertices);
+        computeShader.SetBuffer(kernelIndex, "bufIndices", gpuIndices);
+        //computeShader.SetBuffer(0, "triangleVelocity", triangleVelocity);
         
-        computeShader.Dispatch(0, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
+        computeShader.Dispatch(kernelIndex, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
         
         // Vertex0[] vertex0 = new Vertex0[charMesh.vertexCount];
         // gpuSkinnedVertices.GetData(vertex0);
@@ -99,10 +122,26 @@ public class SciFiSpawn2 : MonoBehaviour
         charMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
         charMesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
         skinnedMeshRenderer.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+
+        VertexAttributeDescriptor[] attrib = new VertexAttributeDescriptor[10];
+        charMesh.GetVertexAttributes(attrib);
+        for (int i = 0; i < 10; i++)
+        {
+            Debug.Log(attrib[i]);
+        }
+        
+        
+        charMesh.SetVertexBufferParams(charMesh.vertexCount, 
+            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, dimension:3,stream:0), 
+                        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, dimension:3,stream:0),
+                        new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, dimension:4,stream:0),
+                        new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, dimension:2,stream:0),
+                        new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, dimension:2,stream:1),
+                        new VertexAttributeDescriptor(VertexAttribute.BlendWeight, VertexAttributeFormat.Float32, dimension:4,stream:2),
+                        new VertexAttributeDescriptor(VertexAttribute.BlendIndices, VertexAttributeFormat.UInt32, dimension:4,stream:2)
+            );
     }
 }
-
-
 
 struct Vertex0
 {

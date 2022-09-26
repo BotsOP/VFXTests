@@ -26,7 +26,7 @@ Shader "Unlit/WireframeFixedWidth"
 
             #include "UnityCG.cginc"
 
-            struct appdata
+            struct meshdata
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
@@ -48,7 +48,7 @@ Shader "Unlit/WireframeFixedWidth"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            v2f vert(appdata v)
+            v2f vert(meshdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -102,7 +102,7 @@ Shader "Unlit/WireframeFixedWidth"
 
             #include "UnityCG.cginc"
 
-            struct appdata
+            struct meshdata
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
@@ -124,7 +124,7 @@ Shader "Unlit/WireframeFixedWidth"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            v2f vert(appdata v)
+            v2f vert(meshdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
