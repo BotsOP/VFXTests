@@ -24,7 +24,9 @@ public class SciFiSpawn2 : MonoBehaviour
     private Mesh charMesh;
     private Transform meshTransform;
     private Camera mainCam;
-    
+    private int hitCount;
+    private Queue<GraphicsBuffer> charBufferHit = new Queue<GraphicsBuffer>();
+
     private GraphicsBuffer gpuVertices;
     private GraphicsBuffer gpuSkinnedVertices;
     private GraphicsBuffer gpuIndices;
@@ -71,23 +73,57 @@ public class SciFiSpawn2 : MonoBehaviour
 
     void Update()
     {
-        if (Time.time > 1)
-        {
-            UpdateChar();
-        }
+        UpdateChar();
 
         if (Input.GetMouseButtonDown(0))
         {
+            Debug.Log($"fired");
+            
             RaycastHit hit;
             Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
         
             if (Physics.Raycast(ray, out hit)) {
-                Transform objectHit = hit.transform;
+                HitChar(hit.point);
             }
         }
 
         charMeshTransform.position = animTransform.position;
         charMeshTransform.rotation = animTransform.rotation;
+    }
+    
+    //TODO
+    /*
+     * skinned to mesh shader
+     *
+     * enemy gets hit
+     *      create a new buffer and add it to the queue and hitCount +1
+     *      loop through queue and send buffer to each dispatch
+     * 
+     * enemy triangle hit shader
+     *      write to buffer which triangles are effected
+     *      write to buffer where corresponding triangles should go
+     *      edit texcoord4 to tell other shaders triangles are seperated
+     * 
+     * seperated triangle update shader
+     *      read buffer which triangles should move where
+     *      rotate triangle around a bit
+     *      move triangles back after some time
+     *
+     * enemy triangle hit cleanup
+     *      delete corresponding buffer
+     *      write to texcoord4 they are no longer seperated
+     */
+
+    private void HitChar(Vector3 hitPos)
+    {
+        hitCount++;
+        GraphicsBuffer newHit = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 100, 24);
+        charBufferHit.Enqueue(newHit);
+        
+        computeShader.SetBuffer(kernelIndex, "bufVertices", gpuVertices);
+
+        computeShader.Dispatch(1, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
+
     }
 
     private void UpdateChar()
@@ -155,5 +191,14 @@ struct Vertex0
     public Vector3 position;
     public Vector3 normal;
     public Vector4 tangent;
+}
+
+struct TriangleHit
+{
+    public int index1;
+    public int index2;
+    public int index3;
+
+    public Vector3 targetPos;
 }
 
