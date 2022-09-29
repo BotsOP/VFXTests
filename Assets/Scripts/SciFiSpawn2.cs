@@ -2,58 +2,34 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 public class SciFiSpawn2 : MonoBehaviour
 {
     [SerializeField] private ComputeShader computeShader;
-    [SerializeField] private Material meshMat;
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
     [SerializeField] private MeshFilter meshFilter;
-    [SerializeField] private Transform targetTransform;
     [SerializeField] private Transform animTransform;
     [SerializeField] private Transform charMeshTransform;
-    [SerializeField][Range(0, 2f)] private float triangleDist;
+    [SerializeField][Range(0, 0.5f)] private float triangleDist;
     [SerializeField][Range(0, 1)] private float triangleLerp;
-    [SerializeField][Range(0, 1)] private float cutOffDist;
-    [SerializeField] private bool spawn;
-    [SerializeField] private bool reset;
-    [SerializeField] private int kernelIndex;
-    [SerializeField] private Transform[] targetTransforms;
-    
+    [SerializeField]
+
+    private List<TriangleDestruction> triangleDestructions;
     private Mesh charMesh;
     private Transform meshTransform;
     private Camera mainCam;
-    private int hitCount;
-    private List<ComputeBuffer> charBufferHit = new List<ComputeBuffer>();
-    private List<int> charBufferHitAmount = new List<int>(); 
 
     private GraphicsBuffer gpuVertices;
     private GraphicsBuffer gpuSkinnedVertices;
     private GraphicsBuffer gpuIndices;
 
-    private void OnDrawGizmos()
-    {
-        Vector4 target = meshFilter.transform.worldToLocalMatrix.MultiplyPoint3x4(targetTransform.position);
-        
-        meshMat.SetVector("_targetPos", target);
-        meshMat.SetFloat("_dist", cutOffDist);
-    }
-
     private void OnEnable()
     {
         charMesh = meshFilter.sharedMesh;
         meshTransform = meshFilter.transform;
-        // triangleVelocity = new GraphicsBuffer(GraphicsBuffer.Target.Structured, charMesh.triangles.Length / 3 + 3, 12);
-        //
-        // Vector3[] randomDir = new Vector3[charMesh.triangles.Length / 3 + 3];
-        // for (int i = 0; i < randomDir.Length; i++)
-        // {
-        //     randomDir[i] = new Vector3(UnityEngine.Random.Range(-0.1f, 0.1f), UnityEngine.Random.Range(-0.1f, 0.1f), UnityEngine.Random.Range(-0.1f, 0.1f));
-        // }
-        //
-        // triangleVelocity.SetData(randomDir);
 
         mainCam = Camera.main;
         
@@ -72,16 +48,9 @@ public class SciFiSpawn2 : MonoBehaviour
 
     void Update()
     {
-        if (Time.time > 1)
+        if (Time.time > 0.1f)
         {
             UpdateChar();
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            Debug.Log($"fired");
-            
-            
         }
 
         charMeshTransform.position = animTransform.position;
@@ -98,9 +67,9 @@ public class SciFiSpawn2 : MonoBehaviour
         computeShader.SetFloat("triDist", triangleDist);
         computeShader.SetFloat("triLerp", triangleLerp);
         computeShader.SetFloat("time", Time.time);
-        computeShader.SetFloat("deltaTime", Time.deltaTime);
-        computeShader.SetBool("spawn", spawn);
-        computeShader.SetBool("reset", reset);
+        computeShader.SetVector("worldPos", transform.position);
+        computeShader.SetMatrix("objToWorld", meshTransform.localToWorldMatrix);
+        computeShader.SetMatrix("worldToObj", meshTransform.worldToLocalMatrix);
         
         computeShader.SetBuffer(0, "bufSkinnedVertices", gpuSkinnedVertices);
         computeShader.SetBuffer(0, "bufVertices", gpuVertices);
@@ -128,18 +97,10 @@ public class SciFiSpawn2 : MonoBehaviour
             }
         }
         
-        computeShader.SetBuffer(2, "bufSkinnedVertices", gpuSkinnedVertices);
         computeShader.SetBuffer(2, "bufVertices", gpuVertices);
         computeShader.SetBuffer(2, "bufIndices", gpuIndices);
-        computeShader.SetVectorArray("targets", targetTransforms.Select(transform => 
-            new Vector4(transform.position.x, transform.position.y, transform.position.z, 1)).ToArray());
 
-        foreach (var target in targetTransforms)
-        {
-            Vector4 newTarget = meshTransform.worldToLocalMatrix.MultiplyPoint3x4(target.position);
-            computeShader.SetVector("target", newTarget);
-            computeShader.Dispatch(2, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
-        }
+        computeShader.Dispatch(2, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
 
         // Vertex0[] vertex0 = new Vertex0[charMesh.vertexCount];
         // gpuSkinnedVertices.GetData(vertex0);
@@ -189,6 +150,7 @@ struct Vertex0
 struct TriangleDestruction
 {
     public float totalTime;
+    public float explosionRadius;
+    public float explosionStrength;
     public float startTime;
-    
 }

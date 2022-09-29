@@ -13,10 +13,10 @@ RWByteAddressBuffer bufIndices;
 float triDist;
 float triLerp;
 float time;
-float deltaTime;
-bool spawn;
-bool reset;
+float explosionRadius;
+float explosionStrength;
 float3 target;
+float3 worldPos;
 float4x4 objToWorld;
 float4x4 worldToObj;
 
@@ -41,17 +41,9 @@ void SkinnedToMesh (uint3 id : SV_DispatchThreadID)
     float3 animTri2 = asfloat(bufSkinnedVertices.Load3(index2 * SKINNED_VERTEX_STRIDE));
     float3 animTri3 = asfloat(bufSkinnedVertices.Load3(index3 * SKINNED_VERTEX_STRIDE));
     
-    bufVertices.Store3(index1 * VERTEX_STRIDE, asuint(animTri1));
-    bufVertices.Store3(index2 * VERTEX_STRIDE, asuint(animTri2));
-    bufVertices.Store3(index3 * VERTEX_STRIDE, asuint(animTri3));
-
-    // bufVertices.Store(index1 * VERTEX_STRIDE + 40, asuint(0));
-    // bufVertices.Store(index2 * VERTEX_STRIDE + 40, asuint(0));
-    // bufVertices.Store(index3 * VERTEX_STRIDE + 40, asuint(0));
-
-    // bufVertices.Store3(index1 * VERTEX_STRIDE + 44, asuint(float3(0, 0, 0)));
-    // bufVertices.Store3(index2 * VERTEX_STRIDE + 44, asuint(float3(0, 0, 0)));
-    // bufVertices.Store3(index3 * VERTEX_STRIDE + 44, asuint(float3(0, 0, 0)));
+    bufVertices.Store3(index1 * VERTEX_STRIDE, asuint(animTri1 * 1.01));
+    bufVertices.Store3(index2 * VERTEX_STRIDE, asuint(animTri2 * 1.01));
+    bufVertices.Store3(index3 * VERTEX_STRIDE, asuint(animTri3 * 1.01));
 }
 
 [numthreads(64,1,1)]
@@ -82,7 +74,10 @@ void triangleDestructionTarget (uint3 id : SV_DispatchThreadID)
 
         float3 avgNor = (nor1 + nor2 + nor3) / 3;
 
-        bufVertices.Store3(index1 * VERTEX_STRIDE + 44, asuint(animCenterTri + avgNor * distT));
+        float3 targetLocation = animCenterTri + avgNor * distT;
+        targetLocation = mul(objToWorld, float4(targetLocation, 1));
+
+        bufVertices.Store3(index1 * VERTEX_STRIDE + 44, asuint(targetLocation));
 
         bufVertices.Store(index1 * VERTEX_STRIDE + 40, asuint(triLerp));
         bufVertices.Store(index2 * VERTEX_STRIDE + 40, asuint(triLerp));
@@ -103,19 +98,19 @@ void triangleDestruction (uint3 id : SV_DispatchThreadID)
     float3 tri1 = asfloat(bufVertices.Load3(index1 * VERTEX_STRIDE));
     float3 tri2 = asfloat(bufVertices.Load3(index2 * VERTEX_STRIDE));
     float3 tri3 = asfloat(bufVertices.Load3(index3 * VERTEX_STRIDE));
-
+    
     float3 animCenterTri = (tri1 + tri2 + tri3) / 3;
-
+    
     float3 newTarget = asfloat(bufVertices.Load3(index1 * VERTEX_STRIDE + 44));
+    newTarget = mul(worldToObj, float4(newTarget, 1));
     float affected = bufVertices.Load(index1 * VERTEX_STRIDE + 40);
 
-    float distanceToTarget = distance(animCenterTri, newTarget);
     if(affected > 0)
     {
         float3 animTri1 = asfloat(bufVertices.Load3(index1 * VERTEX_STRIDE));
         float3 animTri2 = asfloat(bufVertices.Load3(index2 * VERTEX_STRIDE));
         float3 animTri3 = asfloat(bufVertices.Load3(index3 * VERTEX_STRIDE));
-
+        
         float3 tri1Offset = animTri1 - animCenterTri;
         float3 tri2Offset = animTri2 - animCenterTri;
         float3 tri3Offset = animTri3 - animCenterTri;
@@ -124,12 +119,12 @@ void triangleDestruction (uint3 id : SV_DispatchThreadID)
         tri1 = newCenterTri + tri1Offset;
         tri2 = newCenterTri + tri2Offset;
         tri3 = newCenterTri + tri3Offset;
-
+        
         bufVertices.Store(index1 * VERTEX_STRIDE + 40, asuint(triLerp));
         bufVertices.Store(index2 * VERTEX_STRIDE + 40, asuint(triLerp));
         bufVertices.Store(index3 * VERTEX_STRIDE + 40, asuint(triLerp));
     }
-
+    
     bufVertices.Store3(index1 * VERTEX_STRIDE, asuint(tri1));
     bufVertices.Store3(index2 * VERTEX_STRIDE, asuint(tri2));
     bufVertices.Store3(index3 * VERTEX_STRIDE, asuint(tri3));

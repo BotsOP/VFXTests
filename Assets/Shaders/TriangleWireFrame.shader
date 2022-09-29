@@ -7,7 +7,6 @@ Shader "Unlit/WireframeFixedWidth"
         _WireframeFrontColour("Wireframe front colour", color) = (1.0, 1.0, 1.0, 1.0)
         _WireframeWidth("Wireframe width", float) = 1
         _targetPos("target position", vector) = (0, 0, 0, 0)
-        _dist ("DistanceMax", float) = 1
     }
     SubShader
     {
@@ -195,7 +194,6 @@ Shader "Unlit/WireframeFixedWidth"
 
             half4 _WireframeFrontColour;
             float _WireframeWidth;
-            float _dist;
 
             half4 frag(g2f i) : SV_Target
             {
