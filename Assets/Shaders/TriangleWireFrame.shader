@@ -124,7 +124,7 @@ Shader "Unlit/WireframeFixedWidth"
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
                 float2 uv : TEXCOORD1;
-                float2 displacement : TEXCOORD4;
+                float2 displacement : TEXCOORD6;
             };
 
             struct v2f
@@ -133,7 +133,7 @@ Shader "Unlit/WireframeFixedWidth"
                 float3 normal : TEXCOORD2;
                 float3 wPos : TEXCOORD3;
                 float2 uv : TEXCOORD1;
-                float2 displacement : TEXCOORD4;
+                float2 displacement : TEXCOORD6;
             };
 
             // We add our barycentric variables to the geometry struct.
@@ -143,7 +143,7 @@ Shader "Unlit/WireframeFixedWidth"
                 float2 uv : TEXCOORD1;
                 float3 wPos : TEXCOORD3;
                 float3 barycentric : TEXCOORD0;
-                float2 displacement : TEXCOORD4;
+                float2 displacement : TEXCOORD6;
             };
 
             sampler2D _MainTex;

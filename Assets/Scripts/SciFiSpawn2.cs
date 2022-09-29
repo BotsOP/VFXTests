@@ -89,11 +89,14 @@ public class SciFiSpawn2 : MonoBehaviour
                 Vector4 newTarget = meshTransform.worldToLocalMatrix.MultiplyPoint3x4(hit.point);
                 computeShader.SetVector("target", newTarget);
                 computeShader.SetFloat("triLerp", triangleLerp);
+                computeShader.SetFloat("time", Time.time);
                 computeShader.SetBuffer(1, "bufSkinnedVertices", gpuSkinnedVertices);
                 computeShader.SetBuffer(1, "bufVertices", gpuVertices);
                 computeShader.SetBuffer(1, "bufIndices", gpuIndices);
                 
                 computeShader.Dispatch(1, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
+                
+                StartCoroutine(waitTest());
             }
         }
         
@@ -107,6 +110,14 @@ public class SciFiSpawn2 : MonoBehaviour
         //charMesh.SetVertices(vertex0.Select(vertex => vertex.position).ToArray());
         // UInt32[] index = new uint[charMesh.triangles.Length];
         // gpuIndices.GetData(index);
+    }
+
+    IEnumerator waitTest()
+    {
+        yield return new WaitForSeconds(0.1f);
+        Vertex0[] vertex0 = new Vertex0[charMesh.vertexCount];
+        gpuVertices.GetData(vertex0);
+        float test = Time.time + 1;
     }
     
     private void SetMesh()
@@ -126,8 +137,9 @@ public class SciFiSpawn2 : MonoBehaviour
             new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, dimension:3,stream:0), 
                         new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, dimension:3,stream:0),
                         new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, dimension:4,stream:0),
-                        new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, dimension:2,stream:0),
-                        new VertexAttributeDescriptor(VertexAttribute.TexCoord5, VertexAttributeFormat.Float32, dimension:2,stream:0),
+                        new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, dimension:3,stream:0),
+                        new VertexAttributeDescriptor(VertexAttribute.TexCoord5, VertexAttributeFormat.Float32, dimension:3,stream:0),
+                        new VertexAttributeDescriptor(VertexAttribute.TexCoord6, VertexAttributeFormat.Float32, dimension:2,stream:0),
                         new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, dimension:2,stream:1),
                         new VertexAttributeDescriptor(VertexAttribute.BlendWeight, VertexAttributeFormat.Float32, dimension:4,stream:2),
                         new VertexAttributeDescriptor(VertexAttribute.BlendIndices, VertexAttributeFormat.UInt32, dimension:4,stream:2)
@@ -144,7 +156,9 @@ struct Vertex0
     public Vector3 position;
     public Vector3 normal;
     public Vector4 tangent;
-    public Vector2 texcoord4;
+    public Vector3 texcoord4;
+    public Vector3 texcoord5;
+    public Vector2 texcoord6;
 }
 
 struct TriangleDestruction
