@@ -34,7 +34,7 @@ Material:
     m_Colors:
     - _Color: {r: 0.29019612, g: 0.5713235, b: 0.8392157, a: 1}
     - _Direction: {r: 1, g: 0.49, b: 0, a: 0}
-    - _WaveA: {r: 1, g: 1, b: 0.3, a: 0.6}
-    - _WaveB: {r: 1, g: 0.41, b: 0.2, a: 0.4}
+    - _WaveA: {r: 0.68, g: 1, b: 0.3, a: 0.6}
+    - _WaveB: {r: 1.54, g: 0.41, b: 0.2, a: 0.4}
     - _WaveC: {r: 1, g: 1.3, b: 0.2, a: 0.3}
   m_BuildTextureStacks: []

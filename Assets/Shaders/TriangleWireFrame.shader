@@ -208,7 +208,7 @@ Shader "Unlit/WireframeFixedWidth"
                 float3 diffuseColor = _Color * tex2D(_MainTex, i.uv);
             	float3 diffuse = diffuseColor * diffuseLight;
 
-                if(i.displacement.x > 0 && i.displacement.y > 0)
+                if(i.displacement.x > 0)
                 {
                     float3 unitWidth = fwidth(i.barycentric);
                     float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * _WireframeWidth, i.barycentric);
