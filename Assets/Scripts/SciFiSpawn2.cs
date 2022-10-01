@@ -11,24 +11,27 @@ public class SciFiSpawn2 : MonoBehaviour
     [SerializeField] private ComputeShader computeShader;
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
     [SerializeField] private MeshFilter meshFilter;
+    [SerializeField] private MeshFilter underMeshFilter;
     [SerializeField] private Transform animTransform;
     [SerializeField] private Transform charMeshTransform;
+    [SerializeField] private Transform underCharMeshTransform;
     [SerializeField][Range(0, 0.5f)] private float triangleDist;
     [SerializeField][Range(0, 1)] private float triangleLerp;
-    [SerializeField]
 
-    private List<TriangleDestruction> triangleDestructions;
     private Mesh charMesh;
+    private Mesh underCharMesh;
     private Transform meshTransform;
     private Camera mainCam;
 
-    private GraphicsBuffer gpuVertices;
     private GraphicsBuffer gpuSkinnedVertices;
+    private GraphicsBuffer gpuUnderVertices;
+    private GraphicsBuffer gpuVertices;
     private GraphicsBuffer gpuIndices;
 
     private void OnEnable()
     {
         charMesh = meshFilter.sharedMesh;
+        underCharMesh = underMeshFilter.sharedMesh;
         meshTransform = meshFilter.transform;
 
         mainCam = Camera.main;
@@ -44,23 +47,29 @@ public class SciFiSpawn2 : MonoBehaviour
         gpuVertices = null;
         gpuIndices?.Dispose();
         gpuIndices = null;
+        gpuUnderVertices?.Dispose();
+        gpuUnderVertices = null;
     }
 
     void Update()
     {
-        if (Time.time > 0.1f)
+        if (Time.time > 0.5f)
         {
             UpdateChar();
         }
 
         charMeshTransform.position = animTransform.position;
         charMeshTransform.rotation = animTransform.rotation;
+        
+        underCharMeshTransform.position = animTransform.position;
+        underCharMeshTransform.rotation = animTransform.rotation;
     }
 
 
     private void UpdateChar()
     {
         gpuSkinnedVertices ??= skinnedMeshRenderer.GetVertexBuffer();
+        gpuUnderVertices ??= underCharMesh.GetVertexBuffer(0);
         gpuVertices ??= charMesh.GetVertexBuffer(0);
         gpuIndices ??= charMesh.GetIndexBuffer();
 
@@ -72,6 +81,7 @@ public class SciFiSpawn2 : MonoBehaviour
         computeShader.SetMatrix("worldToObj", meshTransform.worldToLocalMatrix);
         
         computeShader.SetBuffer(0, "bufSkinnedVertices", gpuSkinnedVertices);
+        computeShader.SetBuffer(0, "bufUnderVertices", gpuUnderVertices);
         computeShader.SetBuffer(0, "bufVertices", gpuVertices);
         computeShader.SetBuffer(0, "bufIndices", gpuIndices);
         
@@ -91,6 +101,8 @@ public class SciFiSpawn2 : MonoBehaviour
                 computeShader.SetFloat("triLerp", triangleLerp);
                 computeShader.SetFloat("time", Time.time);
                 computeShader.SetBuffer(1, "bufSkinnedVertices", gpuSkinnedVertices);
+                computeShader.SetBuffer(1, "bufUnderVertices", gpuUnderVertices);
+
                 computeShader.SetBuffer(1, "bufVertices", gpuVertices);
                 computeShader.SetBuffer(1, "bufIndices", gpuIndices);
                 
@@ -102,6 +114,8 @@ public class SciFiSpawn2 : MonoBehaviour
         
         computeShader.SetBuffer(2, "bufVertices", gpuVertices);
         computeShader.SetBuffer(2, "bufIndices", gpuIndices);
+        computeShader.SetBuffer(2, "bufUnderVertices", gpuUnderVertices);
+
 
         computeShader.Dispatch(2, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
 
@@ -117,12 +131,12 @@ public class SciFiSpawn2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         Vertex0[] vertex0 = new Vertex0[charMesh.vertexCount];
         gpuVertices.GetData(vertex0);
-        float test = Time.time + 1;
     }
     
     private void SetMesh()
     {
         charMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+        underCharMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
         charMesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
         skinnedMeshRenderer.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
 
@@ -145,9 +159,20 @@ public class SciFiSpawn2 : MonoBehaviour
                         new VertexAttributeDescriptor(VertexAttribute.BlendIndices, VertexAttributeFormat.UInt32, dimension:4,stream:2)
             );
         
+        underCharMesh.SetVertexBufferParams(charMesh.vertexCount, 
+                                       new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, dimension:3,stream:0), 
+                                       new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, dimension:3,stream:0),
+                                       new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, dimension:4,stream:0),
+                                       new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, dimension:2,stream:0),
+                                       new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, dimension:2,stream:1),
+                                       new VertexAttributeDescriptor(VertexAttribute.BlendWeight, VertexAttributeFormat.Float32, dimension:4,stream:2),
+                                       new VertexAttributeDescriptor(VertexAttribute.BlendIndices, VertexAttributeFormat.UInt32, dimension:4,stream:2)
+        );
+        
         charMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
         charMesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
         skinnedMeshRenderer.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+        underCharMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
     }
 }
 
@@ -159,12 +184,4 @@ struct Vertex0
     public Vector3 texcoord4;
     public Vector3 texcoord5;
     public Vector2 texcoord6;
-}
-
-struct TriangleDestruction
-{
-    public float totalTime;
-    public float explosionRadius;
-    public float explosionStrength;
-    public float startTime;
 }

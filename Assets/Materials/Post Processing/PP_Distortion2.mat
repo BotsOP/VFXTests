@@ -26,7 +26,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Distance: 0.5
+    - _Distance: 524.82886
     - _Width: 0.5
     m_Colors:
     - _PosOrigin: {r: 4.51, g: 0, b: 0.35, a: 0}

@@ -3,6 +3,7 @@ Shader "Unlit/WireframeFixedWidth"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
+        _ColorLifetime("Color lifetime", 2D) = "white" {}
         _Color ("Color", Color) = (0.25, 0.5, 0.5, 1)
         _WireframeFrontColour("Wireframe front colour", color) = (1.0, 1.0, 1.0, 1.0)
         _WireframeWidth("Wireframe width", float) = 1
@@ -13,8 +14,13 @@ Shader "Unlit/WireframeFixedWidth"
         Tags { 
             "RenderPipeline" = "UniversalPipeline" 
             "IgnoreProjector" = "True" 
-            "Queue" = "Transparent" 
+            "Queue" = "Transparent"
             "RenderType" = "Transparent"
+        }
+        Stencil {
+            Ref 1
+            Comp Always
+            Pass replace
         }
         LOD 100
         Blend SrcAlpha OneMinusSrcAlpha
@@ -147,6 +153,7 @@ Shader "Unlit/WireframeFixedWidth"
             };
 
             sampler2D _MainTex;
+            sampler2D _ColorLifetime;
             float4 _MainTex_ST;
             float4 _Color;
             float4 _targetPos;
@@ -211,7 +218,11 @@ Shader "Unlit/WireframeFixedWidth"
                     float3 unitWidth = fwidth(i.barycentric);
                     float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * _WireframeWidth, i.barycentric);
                     float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
-                    half3 color = lerp(diffuse, _WireframeFrontColour, alpha);
+                    
+                    float totalTime = 10;
+                    float localTime = (_Time.y - i.displacement.y + 0.001) / totalTime;
+                    float3 wireFrameColor = tex2D(_ColorLifetime, float2(localTime, 1));
+                    half3 color = lerp(diffuse, wireFrameColor, alpha);
                     color = lerp(diffuse, color, i.displacement.x * 10);
                     return half4(color, 1);
                 }
