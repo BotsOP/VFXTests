@@ -17,6 +17,7 @@ float triLerp;
 float time;
 float explosionRadius;
 float explosionStrength;
+float totalTime;
 float3 target;
 float3 worldPos;
 float4x4 objToWorld;
@@ -158,7 +159,6 @@ void triangleDestruction (uint3 id : SV_DispatchThreadID)
         float3 tri3Offset = animTri3 - animCenterTri;
         
         float2 startTime = asfloat(bufVertices.Load2(index1 * VERTEX_STRIDE + 68));
-        float totalTime = 10;
         float localTime = ((time - startTime.x) + 0.001) / totalTime;
         float timeLerp = saturate(-pow(localTime * 2 - 1, 8) + 1);
 

@@ -12,11 +12,13 @@ public class SciFiSpawn2 : MonoBehaviour
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private MeshFilter underMeshFilter;
+    [SerializeField] private Material[] meshMats;
     [SerializeField] private Transform animTransform;
     [SerializeField] private Transform charMeshTransform;
     [SerializeField] private Transform underCharMeshTransform;
     [SerializeField][Range(0, 0.5f)] private float triangleDist;
     [SerializeField][Range(0, 1)] private float triangleLerp;
+    [SerializeField][Range(0, 10)] private float triangleTotalTime;
 
     private Mesh charMesh;
     private Mesh underCharMesh;
@@ -68,6 +70,11 @@ public class SciFiSpawn2 : MonoBehaviour
 
     private void UpdateChar()
     {
+        foreach (var meshMat in meshMats)
+        {
+            meshMat.SetFloat("_TotalTime", triangleTotalTime);
+        }
+        
         gpuSkinnedVertices ??= skinnedMeshRenderer.GetVertexBuffer();
         gpuUnderVertices ??= underCharMesh.GetVertexBuffer(0);
         gpuVertices ??= charMesh.GetVertexBuffer(0);
@@ -76,6 +83,7 @@ public class SciFiSpawn2 : MonoBehaviour
         computeShader.SetFloat("triDist", triangleDist);
         computeShader.SetFloat("triLerp", triangleLerp);
         computeShader.SetFloat("time", Time.time);
+        computeShader.SetFloat("totalTime", triangleTotalTime);
         computeShader.SetVector("worldPos", transform.position);
         computeShader.SetMatrix("objToWorld", meshTransform.localToWorldMatrix);
         computeShader.SetMatrix("worldToObj", meshTransform.worldToLocalMatrix);
