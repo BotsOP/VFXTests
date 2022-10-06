@@ -26,8 +26,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Distance: 524.82886
-    - _Width: 0.5
+    - _Distance: 33.057735
+    - _Width: 0.59
     m_Colors:
-    - _PosOrigin: {r: 4.51, g: 0, b: 0.35, a: 0}
+    - _PosOrigin: {r: 5.342, g: 0.142, b: 1.123, a: 0}
   m_BuildTextureStacks: []

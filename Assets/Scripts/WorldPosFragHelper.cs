@@ -17,7 +17,7 @@ public class WorldPosFragHelper : MonoBehaviour
     {
         postPrcossMat.SetVector(PosOrigin, source.position);
         
-        float shockwaveDistance = (float)Math.Pow(Time.time % 1 + 1, shockwavePow) - 1;
+        float shockwaveDistance = (float)Math.Pow(Time.time, shockwavePow) - 1;
         shockwaveDistance *= shockwaveSpeed;
         shockwaveDistance %= shockwaveDist;
         postPrcossMat.SetFloat(Distance, shockwaveDistance);

@@ -69,6 +69,10 @@ void SkinnedToMesh (uint3 id : SV_DispatchThreadID)
     bufUnderVertices.Store3(index1 * UNDER_VERTEX_STRIDE + 12, asuint(nor1));
     bufUnderVertices.Store3(index2 * UNDER_VERTEX_STRIDE + 12, asuint(nor2));
     bufUnderVertices.Store3(index3 * UNDER_VERTEX_STRIDE + 12, asuint(nor3));
+    
+    bufUnderVertices.Store(index1 * UNDER_VERTEX_STRIDE + 40, asuint(0));
+    bufUnderVertices.Store(index2 * UNDER_VERTEX_STRIDE + 40, asuint(0));
+    bufUnderVertices.Store(index3 * UNDER_VERTEX_STRIDE + 40, asuint(0));
 }
 
 [numthreads(64,1,1)]
@@ -100,21 +104,14 @@ void triangleDestructionTarget (uint3 id : SV_DispatchThreadID)
 
         float3 avgNor = (nor1 + nor2 + nor3) / 3;
 
-        float3 targetLocation = animCenterTri + avgNor * distT;
+        float3 targetLocation = animCenterTri + avgNor * distT * triLerp;
         targetLocation = mul(objToWorld, float4(targetLocation, 1));
 
         float3 centerLocation = mul(objToWorld, float4(animCenterTri, 1));
 
         bufVertices.Store3(index1 * VERTEX_STRIDE + 40, asuint(targetLocation));
         bufVertices.Store3(index1 * VERTEX_STRIDE + 52, asuint(centerLocation));
-
-        bufVertices.Store(index1 * VERTEX_STRIDE + 64, asuint(triLerp));
-        bufVertices.Store(index2 * VERTEX_STRIDE + 64, asuint(triLerp));
-        bufVertices.Store(index3 * VERTEX_STRIDE + 64, asuint(triLerp));
-
-        bufUnderVertices.Store(index1 * UNDER_VERTEX_STRIDE + 40, asuint(triLerp));
-        bufUnderVertices.Store(index2 * UNDER_VERTEX_STRIDE + 40, asuint(triLerp));
-        bufUnderVertices.Store(index3 * UNDER_VERTEX_STRIDE + 40, asuint(triLerp));
+        bufVertices.Store(index1 * VERTEX_STRIDE + 64, asuint(1));
         
         bufVertices.Store(index1 * VERTEX_STRIDE + 68, asuint(time));
         bufVertices.Store(index2 * VERTEX_STRIDE + 68, asuint(time));

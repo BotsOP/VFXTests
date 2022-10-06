@@ -18,6 +18,7 @@ public class SciFiSpawn2 : MonoBehaviour
     [SerializeField] private Transform underCharMeshTransform;
     [SerializeField][Range(0, 0.5f)] private float triangleDist;
     [SerializeField][Range(0, 1)] private float triangleLerp;
+    [SerializeField][Range(0, 1)] private float addDist;
     [SerializeField][Range(0, 10)] private float triangleTotalTime;
 
     private Mesh charMesh;
@@ -63,7 +64,7 @@ public class SciFiSpawn2 : MonoBehaviour
         charMeshTransform.position = animTransform.position;
         charMeshTransform.rotation = animTransform.rotation;
         
-        underCharMeshTransform.position = animTransform.position;
+        underCharMeshTransform.position = animTransform.position + new Vector3(1, 0 , 0) * addDist;
         underCharMeshTransform.rotation = animTransform.rotation;
     }
 

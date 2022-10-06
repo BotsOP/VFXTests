@@ -76,7 +76,7 @@ Shader "Example/URPUnlitShaderBasic"
                     shockwaveDir *= shockwaveGradient;
                     half4 col = tex2D(_MainTex, IN.uv + shockwaveDir);
                     
-                    return half4(col.xyz, 1);
+                    return col;
                 }
                 
                 half4 col = tex2D(_MainTex, IN.uv);
