@@ -31,7 +31,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _Cull: 0
-    - _TotalTime: 10
+    - _TotalTime: 2.07
     - _WireframeWidth: 1.98
     - _dist: 0
     m_Colors:

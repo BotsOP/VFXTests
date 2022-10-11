@@ -20,6 +20,7 @@ Shader "Example/URPUnlitShaderBasic"
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Assets/Shaders/Library/Noise.cginc"
             
             struct meshdata
             {
@@ -58,30 +59,17 @@ Shader "Example/URPUnlitShaderBasic"
                     // Adjust z to match NDC for OpenGL
                     real depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(UV));
                 #endif
-                
-                
+
+                float3 ndc = float3(UV * 2 - 1, depth * 2 - 1);
+                float3 clip = mul(UNITY_MATRIX_I_VP, float4(ndc, 1));
                 float3 worldPos = ComputeWorldSpacePosition(UV, depth, UNITY_MATRIX_I_VP);
-
-                float3 dir = _PosOrigin - worldPos;
-                float shockwaveLength = length(_PosOrigin - worldPos);
-
-                dir = normalize(dir);
-
-                if(shockwaveLength < _Distance && shockwaveLength > _Distance - _Width)
-                {
-                    float shockwaveGradient = shockwaveLength - (_Distance - _Width);
-                    shockwaveGradient *= (_Distance - _Width);
-                    shockwaveGradient /= 50 * shockwaveLength;
-                    float2 shockwaveDir = float2(dir.x, dir.z);
-                    shockwaveDir *= shockwaveGradient;
-                    half4 col = tex2D(_MainTex, IN.uv + shockwaveDir);
-                    
-                    return col;
-                }
                 
                 half4 col = tex2D(_MainTex, IN.uv);
+                //float camDist = distance(GetCameraPositionWS()
+
+                float3 v = WNoise(worldPos, 0);
                 
-                return half4(col.xyz, 1);
+                return half4(v.xxx, 1);
             }
             ENDHLSL
         }

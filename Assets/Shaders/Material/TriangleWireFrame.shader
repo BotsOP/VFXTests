@@ -53,7 +53,7 @@ Shader "Universal Render Pipeline/Wireframe"
                 float2 displacement : TEXCOORD6;
             };
 
-            struct v2f
+            struct interpolator
             {
                 float4 vertex : SV_POSITION;
                 float3 normal : TEXCOORD2;
@@ -78,9 +78,9 @@ Shader "Universal Render Pipeline/Wireframe"
             float4 _Color;
             float4 _targetPos;
 
-            v2f vert(meshdata v)
+            interpolator vert(meshdata v)
             {
-                v2f o;
+                interpolator o;
                 o.vertex = TransformObjectToHClip(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.normal = v.normal;
@@ -91,7 +91,7 @@ Shader "Universal Render Pipeline/Wireframe"
 
             // This applies the barycentric coordinates to each vertex in a triangle.
             [maxvertexcount(3)]
-            void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream) {
+            void geom(triangle interpolator IN[3], inout TriangleStream<g2f> triStream) {
                 g2f o;
                 
                 o.pos = IN[0].vertex;

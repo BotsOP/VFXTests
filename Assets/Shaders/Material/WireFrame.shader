@@ -32,7 +32,7 @@ Shader "Unlit/WireframeFixedWidth"
                 float2 uv : TEXCOORD0;
             };
 
-            struct v2f
+            struct interpolator
             {
                 float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
@@ -48,9 +48,9 @@ Shader "Unlit/WireframeFixedWidth"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            v2f vert(meshdata v)
+            interpolator vert(meshdata v)
             {
-                v2f o;
+                interpolator o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
@@ -59,7 +59,7 @@ Shader "Unlit/WireframeFixedWidth"
 
             // This applies the barycentric coordinates to each vertex in a triangle.
             [maxvertexcount(3)]
-            void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream) {
+            void geom(triangle interpolator IN[3], inout TriangleStream<g2f> triStream) {
                 g2f o;
                 o.pos = IN[0].vertex;
                 o.barycentric = float3(1.0, 0.0, 0.0);
@@ -108,7 +108,7 @@ Shader "Unlit/WireframeFixedWidth"
                 float2 uv : TEXCOORD0;
             };
 
-            struct v2f
+            struct interpolator
             {
                 float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
@@ -124,9 +124,9 @@ Shader "Unlit/WireframeFixedWidth"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            v2f vert(meshdata v)
+            interpolator vert(meshdata v)
             {
-                v2f o;
+                interpolator o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
@@ -135,7 +135,7 @@ Shader "Unlit/WireframeFixedWidth"
 
             // This applies the barycentric coordinates to each vertex in a triangle.
             [maxvertexcount(3)]
-            void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream) {
+            void geom(triangle interpolator IN[3], inout TriangleStream<g2f> triStream) {
                 g2f o;
                 o.pos = IN[0].vertex;
                 o.barycentric = float3(1.0, 0.0, 0.0);

@@ -19,15 +19,15 @@ Shader "Custom/EasyColliderMeshColliderPreview" {
                     float4 normal: NORMAL;
                 };
     
-                struct v2f {
+                struct interpolator {
                     float4 vertex : SV_POSITION;
                 };
     
                 half4 _Color;
     
-                v2f vert (appdata_t v)
+                interpolator vert (appdata_t v)
                 {
-                  v2f o;
+                  interpolator o;
                   //world space vert
                   o.vertex = mul(unity_ObjectToWorld, v.vertex);
                   // world space normal
@@ -43,7 +43,7 @@ Shader "Custom/EasyColliderMeshColliderPreview" {
                     
                  
     
-                fixed4 frag (v2f i) : SV_Target
+                fixed4 frag (interpolator i) : SV_Target
                 {
                   // all mesh-collider previews have an alpha value that can be changed if you wish.
                   _Color.a = 0.8f;
