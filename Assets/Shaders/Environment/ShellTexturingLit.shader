@@ -3,9 +3,11 @@ Shader "Unlit/ShellTexturingLit"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Color ("Color", Color) = (0.25, 0.5, 0.5, 1)
     }
     SubShader
     {
+        Cull off
         Tags { "RenderType"="Opaque" }
         LOD 100
 
@@ -39,6 +41,7 @@ Shader "Unlit/ShellTexturingLit"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float4 _Color;
 
             StructuredBuffer<DrawTriangle> _DrawTrianglesBuffer;
             
@@ -57,8 +60,9 @@ Shader "Unlit/ShellTexturingLit"
             fixed4 frag (interpolator i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv) * i.color;
-                return col;
+                fixed4 tex = tex2D(_MainTex, i.uv).x;
+                clip(tex - i.color.x);
+                return tex * _Color;
             }
             ENDCG
         }

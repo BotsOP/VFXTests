@@ -178,10 +178,11 @@ public class SciFiSpawn2 : MonoBehaviour
                                        new VertexAttributeDescriptor(VertexAttribute.BlendIndices, VertexAttributeFormat.UInt32, dimension:4,stream:2)
         );
         
-        charMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
-        charMesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
-        skinnedMeshRenderer.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
-        underCharMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+        // als het opeens niet werkt check dit
+        // charMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+        // charMesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
+        // skinnedMeshRenderer.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+        // underCharMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
     }
 }
 

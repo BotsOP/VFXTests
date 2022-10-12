@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+[RequireComponent(typeof(SkinnedMeshRenderer))]
 public class ShellTexturing : MonoBehaviour
 {
     [Serializable, StructLayout(LayoutKind.Sequential)]
@@ -170,23 +170,16 @@ public class ShellTexturing : MonoBehaviour
         }
 
         Graphics.DrawProceduralIndirect(
-            renderingMaterial, 
-            meshRenderer.bounds, 
-            MeshTopology.Triangles, 
-            indirectArgsBuffer, 
-            0, 
-            null, 
+            renderingMaterial,
+            meshRenderer.bounds,
+            MeshTopology.Triangles,
+            indirectArgsBuffer,
+            0,
             null,
-            UnityEngine.Rendering.ShadowCastingMode.Off, 
-            true, 
+            null,
+            UnityEngine.Rendering.ShadowCastingMode.Off,
+            true,
             gameObject.layer
         );
     }
 }
-
-
-
-
-
-
-

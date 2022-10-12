@@ -1,5 +1,6 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel ShellTextureGeo
+#pragma kernel ShellTextureGeoAnim
 
 struct InputVertex
 {
@@ -13,6 +14,13 @@ struct InputTriangle
     InputVertex vertex0;
     InputVertex vertex1;
     InputVertex vertex2;
+
+    // InputTriangle(InputVertex _Vertex0, InputVertex _Vertex1, InputVertex _Vertex2)
+    // {
+    //     vertex0 = _Vertex0;
+    //     vertex1 = _Vertex1;
+    //     vertex2 = _Vertex2;
+    // }
 };
 
 struct DrawVertex
@@ -40,15 +48,21 @@ StructuredBuffer<InputTriangle> _InputTrianglesBuffer;
 AppendStructuredBuffer<DrawTriangle> _DrawTrianglesBuffer;
 RWStructuredBuffer<IndirectArgs> _IndirectArgsBuffer;
 
+RWByteAddressBuffer _InputVertexBuffer;
+RWByteAddressBuffer _InputIndexBuffer;
+RWByteAddressBuffer _InputUVBuffer;
+
 int _TriangleCount;
 float4x4 _LocalToWorld;
+float4x4 _Offset;
 int _Layers;
 float _HeightOffset;
 
 DrawVertex GetVertex(float3 position, float3 normal, float2 uv, float4 color)
 {
     DrawVertex output = (DrawVertex) 0;
-    output.position = mul(_LocalToWorld, float4(position, 1.0)).xyz;
+    float3 pos = mul(_Offset, float4(position, 1.0));
+    output.position = mul(_LocalToWorld, float4(pos, 1.0)).xyz;
     output.normal = mul(_LocalToWorld, float4(normal, 0.0)).xyz;
     output.uv = uv;
     output.color = color;
@@ -62,11 +76,12 @@ void ShellTextureGeo (uint3 id : SV_DispatchThreadID)
     {
         return;
     }
-
+    
+    
     InputTriangle inputTriangle = _InputTrianglesBuffer[id.x];
     
     DrawTriangle tri = (DrawTriangle) 0;
-
+    
     for (int i = 0; i < _Layers; i++)
     {
         DrawVertex drawVertices[3];
@@ -87,6 +102,65 @@ void ShellTextureGeo (uint3 id : SV_DispatchThreadID)
             inputTriangle.vertex2.normal * _HeightOffset * factor;
         drawVertices[2] = GetVertex(position, inputTriangle.vertex2.normal,
             inputTriangle.vertex2.uv, float4(factor, 0, 0, 1.0));
+        
+        
+        tri.drawVertices[0] = drawVertices[0];
+        tri.drawVertices[1] = drawVertices[1];
+        tri.drawVertices[2] = drawVertices[2];
+        _DrawTrianglesBuffer.Append(tri);
+    }
+    
+    InterlockedAdd(_IndirectArgsBuffer[0].numVerticesPerInstance, 3 * _Layers);
+}
+
+[numthreads(64,1,1)]
+void ShellTextureGeoAnim (uint3 id : SV_DispatchThreadID)
+{
+    if((int)id.x >= _TriangleCount)
+    {
+        return;
+    }
+
+    int index1 = _InputIndexBuffer.Load((id.x * 3) * 4);
+    int index2 = _InputIndexBuffer.Load((id.x * 3 + 1) * 4);
+    int index3 = _InputIndexBuffer.Load((id.x * 3 + 2) * 4);
+
+    InputVertex vertex0;
+    vertex0.position = asfloat(_InputVertexBuffer.Load3(index1 * 40));
+    vertex0.normal = asfloat(_InputVertexBuffer.Load3(index1 * 40 + 12));
+    vertex0.uv = asfloat(_InputVertexBuffer.Load2(index1 * 8));
+
+    InputVertex vertex1;
+    vertex1.position = asfloat(_InputVertexBuffer.Load3(index2 * 40));
+    vertex1.normal = asfloat(_InputVertexBuffer.Load3(index2 * 40 + 12));
+    vertex1.uv = asfloat(_InputVertexBuffer.Load2(index2 * 8));
+
+    InputVertex vertex2;
+    vertex2.position = asfloat(_InputVertexBuffer.Load3(index3 * 40));
+    vertex2.normal = asfloat(_InputVertexBuffer.Load3(index3 * 40 + 12));
+    vertex2.uv = asfloat(_InputVertexBuffer.Load2(index3 * 8));
+    
+    InputTriangle inputTriangle;
+    inputTriangle.vertex0 = vertex0;
+    inputTriangle.vertex1 = vertex1;
+    inputTriangle.vertex2 = vertex2;
+    
+    DrawTriangle tri = (DrawTriangle) 0;
+
+    for (int i = 0; i < _Layers; i++)
+    {
+        DrawVertex drawVertices[3];
+        
+        float factor = (float)(i + 1) / (float) _Layers;
+        
+        float3 position = inputTriangle.vertex0.position + inputTriangle.vertex0.normal * _HeightOffset * factor;
+        drawVertices[0] = GetVertex(position, inputTriangle.vertex0.normal, inputTriangle.vertex0.uv, float4(factor, 0, 0, 1.0));
+        
+        position = inputTriangle.vertex1.position + inputTriangle.vertex1.normal * _HeightOffset * factor;
+        drawVertices[1] = GetVertex(position, inputTriangle.vertex1.normal, inputTriangle.vertex1.uv, float4(factor, 0, 0, 1.0));
+        
+        position = inputTriangle.vertex2.position + inputTriangle.vertex2.normal * _HeightOffset * factor;
+        drawVertices[2] = GetVertex(position, inputTriangle.vertex2.normal, inputTriangle.vertex2.uv, float4(factor, 0, 0, 1.0));
         
         
         tri.drawVertices[0] = drawVertices[0];
