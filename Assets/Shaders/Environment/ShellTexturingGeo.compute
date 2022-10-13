@@ -14,13 +14,6 @@ struct InputTriangle
     InputVertex vertex0;
     InputVertex vertex1;
     InputVertex vertex2;
-
-    // InputTriangle(InputVertex _Vertex0, InputVertex _Vertex1, InputVertex _Vertex2)
-    // {
-    //     vertex0 = _Vertex0;
-    //     vertex1 = _Vertex1;
-    //     vertex2 = _Vertex2;
-    // }
 };
 
 struct DrawVertex
@@ -57,6 +50,7 @@ float4x4 _LocalToWorld;
 float4x4 _Offset;
 int _Layers;
 float _HeightOffset;
+float _UVScale;
 
 DrawVertex GetVertex(float3 position, float3 normal, float2 uv, float4 color)
 {
@@ -128,17 +122,17 @@ void ShellTextureGeoAnim (uint3 id : SV_DispatchThreadID)
     InputVertex vertex0;
     vertex0.position = asfloat(_InputVertexBuffer.Load3(index1 * 40));
     vertex0.normal = asfloat(_InputVertexBuffer.Load3(index1 * 40 + 12));
-    vertex0.uv = asfloat(_InputVertexBuffer.Load2(index1 * 8));
+    vertex0.uv = asfloat(_InputVertexBuffer.Load2(index1 * 8)) * _UVScale;
 
     InputVertex vertex1;
     vertex1.position = asfloat(_InputVertexBuffer.Load3(index2 * 40));
     vertex1.normal = asfloat(_InputVertexBuffer.Load3(index2 * 40 + 12));
-    vertex1.uv = asfloat(_InputVertexBuffer.Load2(index2 * 8));
+    vertex1.uv = asfloat(_InputVertexBuffer.Load2(index2 * 8)) * _UVScale;
 
     InputVertex vertex2;
     vertex2.position = asfloat(_InputVertexBuffer.Load3(index3 * 40));
     vertex2.normal = asfloat(_InputVertexBuffer.Load3(index3 * 40 + 12));
-    vertex2.uv = asfloat(_InputVertexBuffer.Load2(index3 * 8));
+    vertex2.uv = asfloat(_InputVertexBuffer.Load2(index3 * 8)) * _UVScale;
     
     InputTriangle inputTriangle;
     inputTriangle.vertex0 = vertex0;

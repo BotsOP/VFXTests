@@ -1,4 +1,4 @@
-Shader "Unlit/ShellTexturingLit"
+Shader "ShellTexturingUnLit"
 {
     Properties
     {
@@ -39,11 +39,11 @@ Shader "Unlit/ShellTexturingLit"
                 DrawVertex drawVertices[3];
             };
 
+            StructuredBuffer<DrawTriangle> _DrawTrianglesBuffer;
+
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float4 _Color;
-
-            StructuredBuffer<DrawTriangle> _DrawTrianglesBuffer;
             
             interpolator vert (uint vertexID : SV_VertexID)
             {

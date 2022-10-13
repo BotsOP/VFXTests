@@ -33,6 +33,7 @@ public class ShellTexturingAnimated : MonoBehaviour
     [Min(1)]
     [SerializeField] private int layers = 1;
     [SerializeField] private float heightOffset = 0;
+    [SerializeField] private float uvScale = 1;
 
     private int kernelID;
     private int threadGroupSize;
@@ -131,6 +132,7 @@ public class ShellTexturingAnimated : MonoBehaviour
         shellTextureCS.SetInt("_TriangleCount", triangleCount);
         shellTextureCS.SetInt("_Layers", layers);
         shellTextureCS.SetFloat("_HeightOffset", heightOffset);
+        shellTextureCS.SetFloat("_UVScale", uvScale);
         
         renderingMaterial.SetBuffer("_DrawTrianglesBuffer", drawTrianglesBuffer);
         
@@ -143,16 +145,10 @@ public class ShellTexturingAnimated : MonoBehaviour
         {
             return;
         }
-        
-        VertexAttributeDescriptor[] attrib = new VertexAttributeDescriptor[10];
-        mesh.GetVertexAttributes(attrib);
-        for (int i = 0; i < 10; i++)
-        {
-            Debug.Log(attrib[i]);
-        }
 
-        transformOffset = originalOffset;
-        transformOffset.position -= startParenOffset;
+        transformOffset.position = originalOffset.position - startParenOffset;
+        transformOffset.rotation = originalOffset.rotation;
+        transformOffset.localScale = originalOffset.localScale;
         
         indirectArgsBuffer.SetData(indirectArgs);
         shellTextureCS.SetMatrix("_Offset", transformOffset.localToWorldMatrix);
@@ -166,7 +162,7 @@ public class ShellTexturingAnimated : MonoBehaviour
             0,
             null,
             null,
-            UnityEngine.Rendering.ShadowCastingMode.Off,
+            ShadowCastingMode.On,
             true,
             gameObject.layer
         );
@@ -176,8 +172,6 @@ public class ShellTexturingAnimated : MonoBehaviour
     
     private void SetupBuffers()
     {
-        // inputVertexBuffer = new ComputeBuffer(triangleCount, INPUTTRIANGLES_STRIDE, ComputeBufferType.Structured,
-        //     ComputeBufferMode.Immutable);
         drawTrianglesBuffer = new ComputeBuffer(triangleCount * layers, DRAWTRIANGLES_STRIDE, ComputeBufferType.Append);
         indirectArgsBuffer = new ComputeBuffer(1, INDIRECTARGS_STRIDE, ComputeBufferType.IndirectArguments);
     }
