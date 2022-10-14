@@ -33,7 +33,7 @@ public class ShellTexturingAnimated : MonoBehaviour
     [Min(1)]
     [SerializeField] private int layers = 1;
     [SerializeField] private float heightOffset = 0;
-    [SerializeField] private float uvScale = 1;
+    [SerializeField] private Vector2 uvScale = new(1, 1);
 
     private int kernelID;
     private int threadGroupSize;
@@ -132,7 +132,7 @@ public class ShellTexturingAnimated : MonoBehaviour
         shellTextureCS.SetInt("_TriangleCount", triangleCount);
         shellTextureCS.SetInt("_Layers", layers);
         shellTextureCS.SetFloat("_HeightOffset", heightOffset);
-        shellTextureCS.SetFloat("_UVScale", uvScale);
+        shellTextureCS.SetVector("_UVScale", uvScale);
         
         renderingMaterial.SetBuffer("_DrawTrianglesBuffer", drawTrianglesBuffer);
         

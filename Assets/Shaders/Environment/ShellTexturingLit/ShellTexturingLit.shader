@@ -2,6 +2,7 @@ Shader "Custom/ShellTexturingLit" {
     Properties{
         [Header(Surface options)]
         [MainTexture] _ColorMap("Color", 2D) = "white" {}
+        [MainTexture] _NoiseMap("Noise map", 2D) = "white" {}
         [MainColor] _ColorTint("Tint", Color) = (1, 1, 1, 1)
         _Smoothness("Smoothness", Float) = 0
         
