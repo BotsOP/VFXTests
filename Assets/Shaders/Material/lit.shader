@@ -178,7 +178,7 @@ Shader "Universal Render Pipeline/Lit"
             UNITY_VERTEX_INPUT_INSTANCE_ID
         };
 
-        struct Varyings
+        struct Interpolators
         {
             float2 uv                       : TEXCOORD0;
 
@@ -216,7 +216,7 @@ Shader "Universal Render Pipeline/Lit"
             UNITY_VERTEX_OUTPUT_STEREO
         };
 
-        void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData)
+        void InitializeInputData(Interpolators input, half3 normalTS, out InputData inputData)
         {
             inputData = (InputData)0;
 
@@ -281,9 +281,9 @@ Shader "Universal Render Pipeline/Lit"
         ///////////////////////////////////////////////////////////////////////////////
 
         // Used in Standard (Physically Based) shader
-        Varyings LitPassVertex(Attributes input)
+        Interpolators LitPassVertex(Attributes input)
         {
-            Varyings output = (Varyings)0;
+            Interpolators output = (Interpolators)0;
 
             UNITY_SETUP_INSTANCE_ID(input);
             UNITY_TRANSFER_INSTANCE_ID(input, output);
@@ -321,6 +321,7 @@ Shader "Universal Render Pipeline/Lit"
                 output.viewDirTS = viewDirTS;
             #endif
 
+            //Lightmap
             OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
             #ifdef DYNAMICLIGHTMAP_ON
                 output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
@@ -332,10 +333,12 @@ Shader "Universal Render Pipeline/Lit"
                 output.fogFactor = fogFactor;
             #endif
 
+            //Something
             #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
                 output.positionWS = vertexInput.positionWS;
             #endif
 
+            //Something
             #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 output.shadowCoord = GetShadowCoord(vertexInput);
             #endif
@@ -346,7 +349,7 @@ Shader "Universal Render Pipeline/Lit"
         }
 
         // Used in Standard (Physically Based) shader
-        half4 LitPassFragment(Varyings input) : SV_Target
+        half4 LitPassFragment(Interpolators input) : SV_Target
         {
             UNITY_SETUP_INSTANCE_ID(input);
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
@@ -443,7 +446,7 @@ Shader "Universal Render Pipeline/Lit"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-            struct Varyings
+            struct Interpolators
             {
                 float2 uv           : TEXCOORD0;
                 float4 positionCS   : SV_POSITION;
@@ -471,9 +474,9 @@ Shader "Universal Render Pipeline/Lit"
                 return positionCS;
             }
 
-            Varyings ShadowPassVertex(Attributes input)
+            Interpolators ShadowPassVertex(Attributes input)
             {
-                Varyings output;
+                Interpolators output;
                 UNITY_SETUP_INSTANCE_ID(input);
 
                 output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
@@ -481,7 +484,7 @@ Shader "Universal Render Pipeline/Lit"
                 return output;
             }
 
-            half4 ShadowPassFragment(Varyings input) : SV_TARGET
+            half4 ShadowPassFragment(Interpolators input) : SV_TARGET
             {
                 Alpha(SampleAlbedoAlpha(input.uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap)).a, _BaseColor, _Cutoff);
                 return 0;
@@ -600,7 +603,7 @@ Shader "Universal Render Pipeline/Lit"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-            struct Varyings
+            struct Interpolators
             {
                 float2 uv           : TEXCOORD0;
                 float4 positionCS   : SV_POSITION;
@@ -608,9 +611,9 @@ Shader "Universal Render Pipeline/Lit"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            Varyings DepthOnlyVertex(Attributes input)
+            Interpolators DepthOnlyVertex(Attributes input)
             {
-                Varyings output = (Varyings)0;
+                Interpolators output = (Interpolators)0;
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
@@ -619,7 +622,7 @@ Shader "Universal Render Pipeline/Lit"
                 return output;
             }
 
-            half4 DepthOnlyFragment(Varyings input) : SV_TARGET
+            half4 DepthOnlyFragment(Interpolators input) : SV_TARGET
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 

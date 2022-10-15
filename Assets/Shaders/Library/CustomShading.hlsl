@@ -19,7 +19,7 @@ struct Attributes
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
-struct Varyings
+struct Interpolators
 {
     float2 uv                       : TEXCOORD0;
 #if LIGHTMAP_ON
@@ -64,7 +64,7 @@ struct LightingData2
 };
 
 // Forward declaration of SurfaceFunction. This function must be implemented in the shader
-void SurfaceFunction(Varyings IN, out CustomSurfaceData surfaceData);
+void SurfaceFunction(Interpolators IN, out CustomSurfaceData surfaceData);
 
 // Convert normal from tangent space to space of TBN matrix
 // f.ex, if normal and tangent are passed in world space, per-pixel normal will return in world space.
@@ -160,9 +160,9 @@ half3 EnvironmentBRDF(half3 f0, half roughness, half NdotV)
     }
 #endif
 
-Varyings SurfaceVertex(Attributes IN)
+Interpolators SurfaceVertex(Attributes IN)
 {
-    Varyings OUT;
+    Interpolators OUT;
 
     // VertexPositionInputs contains position in multiple spaces (world, view, homogeneous clip space)
     // The compiler will strip all unused references.
@@ -192,7 +192,7 @@ Varyings SurfaceVertex(Attributes IN)
     return OUT;
 }
 
-half4 SurfaceFragment(Varyings IN) : SV_Target
+half4 SurfaceFragment(Interpolators IN) : SV_Target
 {
     CustomSurfaceData surfaceData;
     SurfaceFunction(IN, surfaceData);

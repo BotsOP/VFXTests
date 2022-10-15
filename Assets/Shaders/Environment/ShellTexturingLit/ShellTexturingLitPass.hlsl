@@ -139,7 +139,8 @@ float4 Fragment(Interpolators input) : SV_TARGET{
 	lightingInput.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 	
 	SurfaceData surfaceInput = (SurfaceData)0;
-	surfaceInput.albedo = color * input.color.xxx;
+	surfaceInput.albedo = _ColorTint * input.color.x;
+	surfaceInput.albedo = input.color.yzw;
 	surfaceInput.alpha = 1;
 	surfaceInput.specular = 1;
 	surfaceInput.smoothness = _Smoothness;

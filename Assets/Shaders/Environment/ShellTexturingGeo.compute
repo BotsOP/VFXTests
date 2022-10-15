@@ -42,6 +42,7 @@ AppendStructuredBuffer<DrawTriangle> _DrawTrianglesBuffer;
 RWStructuredBuffer<IndirectArgs> _IndirectArgsBuffer;
 
 RWByteAddressBuffer _InputVertexBuffer;
+RWByteAddressBuffer _InputPreviousVertexBuffer;
 RWByteAddressBuffer _InputIndexBuffer;
 RWByteAddressBuffer _InputUVBuffer;
 
@@ -57,9 +58,14 @@ DrawVertex GetVertex(float3 position, float3 normal, float2 uv, float4 color)
     DrawVertex output = (DrawVertex) 0;
     float3 pos = mul(_Offset, float4(position, 1.0));
     output.position = mul(_LocalToWorld, float4(pos, 1.0)).xyz;
+    
+    // float3 prevPos = mul(_Offset, float4(color.yzw, 1.0));
+    // output.color.yzw = mul(_LocalToWorld, float4(prevPos, 1.0)).xyz;
+    
+    output.color.yzw = color.yzw;
     output.normal = mul(_LocalToWorld, float4(normal, 0.0)).xyz;
     output.uv = uv;
-    output.color = color;
+    output.color.x = color.x;
     return output;
 }
 
@@ -133,6 +139,15 @@ void ShellTextureGeoAnim (uint3 id : SV_DispatchThreadID)
     vertex2.position = asfloat(_InputVertexBuffer.Load3(index3 * 40));
     vertex2.normal = asfloat(_InputVertexBuffer.Load3(index3 * 40 + 12));
     vertex2.uv = asfloat(_InputUVBuffer.Load2(index3 * 8)) * _UVScale.xy;
+
+    float3 vel = float3(0,0,0);
+    float3 vel1 = float3(0,0,0);
+    float3 vel2 = float3(0,0,0);
+
+    //Just loading these values in and assigning them to the drawVertices buffer makes it not render when Im not even using these values anywhere else
+    vel = asfloat(_InputPreviousVertexBuffer.Load3(index1 * 40));
+    vel1 = asfloat(_InputPreviousVertexBuffer.Load3(index2 * 40));
+    vel2 = asfloat(_InputPreviousVertexBuffer.Load3(index3 * 40));
     
     InputTriangle inputTriangle;
     inputTriangle.vertex0 = vertex0;
@@ -148,14 +163,13 @@ void ShellTextureGeoAnim (uint3 id : SV_DispatchThreadID)
         float factor = (float)(i + 1) / (float) _Layers;
         
         float3 position = inputTriangle.vertex0.position + inputTriangle.vertex0.normal * _HeightOffset * factor;
-        drawVertices[0] = GetVertex(position, inputTriangle.vertex0.normal, inputTriangle.vertex0.uv, float4(factor, 0, 0, 1.0));
+        drawVertices[0] = GetVertex(position, inputTriangle.vertex0.normal, inputTriangle.vertex0.uv, float4(factor, vel));
         
         position = inputTriangle.vertex1.position + inputTriangle.vertex1.normal * _HeightOffset * factor;
-        drawVertices[1] = GetVertex(position, inputTriangle.vertex1.normal, inputTriangle.vertex1.uv, float4(factor, 0, 0, 1.0));
+        drawVertices[1] = GetVertex(position, inputTriangle.vertex1.normal, inputTriangle.vertex1.uv, float4(factor, vel1));
         
         position = inputTriangle.vertex2.position + inputTriangle.vertex2.normal * _HeightOffset * factor;
-        drawVertices[2] = GetVertex(position, inputTriangle.vertex2.normal, inputTriangle.vertex2.uv, float4(factor, 0, 0, 1.0));
-        
+        drawVertices[2] = GetVertex(position, inputTriangle.vertex2.normal, inputTriangle.vertex2.uv, float4(factor, vel2));
         
         tri.drawVertices[0] = drawVertices[0];
         tri.drawVertices[1] = drawVertices[1];

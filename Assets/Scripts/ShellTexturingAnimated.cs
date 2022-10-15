@@ -45,6 +45,7 @@ public class ShellTexturingAnimated : MonoBehaviour
     private ComputeBuffer indirectArgsBuffer;
 
     private GraphicsBuffer inputVertexBuffer;
+    private GraphicsBuffer inputPreviousVertexBuffer;
     private GraphicsBuffer inputUVBuffer;
     private GraphicsBuffer inputIndexBuffer;
     
@@ -65,8 +66,7 @@ public class ShellTexturingAnimated : MonoBehaviour
         startParenOffset = parentOffset.position;
         
         SetupBuffers();
-        SetupData();
-        GenerateGeometry();
+        
     }
 
     private void OnDisable()
@@ -88,6 +88,8 @@ public class ShellTexturingAnimated : MonoBehaviour
         }
 
         skinnedMeshRenderer.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+        skinnedMeshRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.Object;
+        skinnedMeshRenderer.skinnedMotionVectors = true;
         mesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
         mesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
         
@@ -114,6 +116,7 @@ public class ShellTexturingAnimated : MonoBehaviour
         }
 
         inputVertexBuffer ??= skinnedMeshRenderer.GetVertexBuffer();
+        inputPreviousVertexBuffer ??= skinnedMeshRenderer.GetPreviousVertexBuffer();
         inputUVBuffer ??= mesh.GetVertexBuffer(1);
         inputIndexBuffer ??= mesh.GetIndexBuffer();
 
@@ -124,6 +127,7 @@ public class ShellTexturingAnimated : MonoBehaviour
         shellTextureCS.SetBuffer(kernelID, "_DrawTrianglesBuffer", drawTrianglesBuffer);
         shellTextureCS.SetBuffer(kernelID, "_IndirectArgsBuffer", indirectArgsBuffer);
         shellTextureCS.SetBuffer(kernelID, "_InputVertexBuffer", inputVertexBuffer);
+        shellTextureCS.SetBuffer(kernelID, "_InputPreviousVertexBuffer", inputPreviousVertexBuffer);
         shellTextureCS.SetBuffer(kernelID, "_InputUVBuffer", inputUVBuffer);
         shellTextureCS.SetBuffer(kernelID, "_InputIndexBuffer", inputIndexBuffer);
         
@@ -143,6 +147,11 @@ public class ShellTexturingAnimated : MonoBehaviour
     {
         if (!initialized)
         {
+            if (Time.time > 1)
+            {
+                SetupData();
+                GenerateGeometry();
+            }
             return;
         }
 

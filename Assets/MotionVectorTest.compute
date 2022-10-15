@@ -1,0 +1,19 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MotionVector
+
+RWByteAddressBuffer _InputVertexBuffer;
+RWByteAddressBuffer _InputPreviousVertexBuffer;
+RWByteAddressBuffer _InputIndexBuffer;
+RWByteAddressBuffer _InputUVBuffer;
+
+[numthreads(64,1,1)]
+void MotionVector (uint3 id : SV_DispatchThreadID)
+{
+    int index1 = _InputIndexBuffer.Load((id.x) * 4);
+    
+    float3 pos = asfloat(_InputVertexBuffer.Load3(index1 * 40));
+    float3 prevPos = asfloat(_InputPreviousVertexBuffer.Load3(index1 * 40));
+    float3 velocity = pos - prevPos;
+    velocity = normalize(velocity);
+    _InputUVBuffer.Store3(index1 * 12, asuint(velocity));
+}
