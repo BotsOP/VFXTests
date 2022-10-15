@@ -5,6 +5,7 @@ Shader "Custom/ShellTexturingLit" {
         [MainTexture] _NoiseMap("Noise map", 2D) = "white" {}
         [MainColor] _ColorTint("Tint", Color) = (1, 1, 1, 1)
         _Smoothness("Smoothness", Float) = 0
+        _MaxHairLength("Max Hair velocity change", Float) = 0
         
         [HideInInspector] _SourceBlend("Source blend", float) = 0
         [HideInInspector] _DestBlend("Destination blend", float) = 0
@@ -45,7 +46,6 @@ Shader "Custom/ShellTexturingLit" {
 
             #pragma vertex Vertex
             #pragma fragment Fragment
-            #pragma target 5.0
 
             #include "ShellTexturingLitPass.hlsl"
             ENDHLSL

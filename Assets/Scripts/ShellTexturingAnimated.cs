@@ -33,7 +33,7 @@ public class ShellTexturingAnimated : MonoBehaviour
     [Min(1)]
     [SerializeField] private int layers = 1;
     [SerializeField] private float heightOffset = 0;
-    [SerializeField] private Vector2 uvScale = new(1, 1);
+    [SerializeField] private int hairDelay;
 
     private int kernelID;
     private int threadGroupSize;
@@ -43,9 +43,9 @@ public class ShellTexturingAnimated : MonoBehaviour
     private List<InputTriangle> inputTriangles;
     private ComputeBuffer drawTrianglesBuffer;
     private ComputeBuffer indirectArgsBuffer;
+    private ComputeBuffer inputPreviousVertexBuffer;
 
     private GraphicsBuffer inputVertexBuffer;
-    private GraphicsBuffer inputPreviousVertexBuffer;
     private GraphicsBuffer inputUVBuffer;
     private GraphicsBuffer inputIndexBuffer;
     
@@ -57,6 +57,7 @@ public class ShellTexturingAnimated : MonoBehaviour
     private int triangleCount;
     private bool initialized = false;
     private Vector3 startParenOffset;
+    private int frameCounter;
 
     private void OnEnable()
     {
@@ -64,9 +65,8 @@ public class ShellTexturingAnimated : MonoBehaviour
         skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
         triangleCount = mesh.triangles.Length / 3;
         startParenOffset = parentOffset.position;
-        
+
         SetupBuffers();
-        
     }
 
     private void OnDisable()
@@ -116,7 +116,8 @@ public class ShellTexturingAnimated : MonoBehaviour
         }
 
         inputVertexBuffer ??= skinnedMeshRenderer.GetVertexBuffer();
-        inputPreviousVertexBuffer ??= skinnedMeshRenderer.GetPreviousVertexBuffer();
+        //inputPreviousVertexBuffer ??= skinnedMeshRenderer.GetPreviousVertexBuffer();
+        skinnedMeshRenderer.skinnedMotionVectors = true;
         inputUVBuffer ??= mesh.GetVertexBuffer(1);
         inputIndexBuffer ??= mesh.GetIndexBuffer();
 
@@ -135,8 +136,9 @@ public class ShellTexturingAnimated : MonoBehaviour
         shellTextureCS.SetMatrix("_Offset", transformOffset.localToWorldMatrix);
         shellTextureCS.SetInt("_TriangleCount", triangleCount);
         shellTextureCS.SetInt("_Layers", layers);
+        shellTextureCS.SetInt("_VertexCount", mesh.vertexCount);
+        shellTextureCS.SetInt("_HairDelay", hairDelay);
         shellTextureCS.SetFloat("_HeightOffset", heightOffset);
-        shellTextureCS.SetVector("_UVScale", uvScale);
         
         renderingMaterial.SetBuffer("_DrawTrianglesBuffer", drawTrianglesBuffer);
         
@@ -155,13 +157,27 @@ public class ShellTexturingAnimated : MonoBehaviour
             return;
         }
 
+        frameCounter++;
+        if (frameCounter < hairDelay)
+        {
+            
+            return;
+        }
+
         transformOffset.position = originalOffset.position - startParenOffset;
         transformOffset.rotation = originalOffset.rotation;
         transformOffset.localScale = originalOffset.localScale;
         
         indirectArgsBuffer.SetData(indirectArgs);
         shellTextureCS.SetMatrix("_Offset", transformOffset.localToWorldMatrix);
+        shellTextureCS.SetInt("_FrameCount", frameCounter);
         shellTextureCS.Dispatch(kernelID, threadGroupSize, 1, 1);
+        
+        shellTextureCS.SetBuffer(2, "_InputVertexBuffer", inputVertexBuffer);
+        shellTextureCS.SetBuffer(2, "_InputPreviousVertexBuffer", inputPreviousVertexBuffer);
+        shellTextureCS.SetBuffer(2, "_InputIndexBuffer", inputIndexBuffer);
+
+        shellTextureCS.Dispatch(2, Mathf.CeilToInt((float)mesh.triangles.Length / 3 / 64), 1, 1);
 
         Graphics.DrawProceduralIndirect(
             renderingMaterial,
@@ -183,6 +199,8 @@ public class ShellTexturingAnimated : MonoBehaviour
     {
         drawTrianglesBuffer = new ComputeBuffer(triangleCount * layers, DRAWTRIANGLES_STRIDE, ComputeBufferType.Append);
         indirectArgsBuffer = new ComputeBuffer(1, INDIRECTARGS_STRIDE, ComputeBufferType.IndirectArguments);
+        inputPreviousVertexBuffer =
+            new ComputeBuffer(mesh.vertexCount * hairDelay, 12, ComputeBufferType.Structured, ComputeBufferMode.Immutable);
     }
     
     private void ReleaseBuffers()

@@ -1,6 +1,7 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel ShellTextureGeo
 #pragma kernel ShellTextureGeoAnim
+#pragma kernel PreviousVertex
 
 struct InputVertex
 {
@@ -42,7 +43,7 @@ AppendStructuredBuffer<DrawTriangle> _DrawTrianglesBuffer;
 RWStructuredBuffer<IndirectArgs> _IndirectArgsBuffer;
 
 RWByteAddressBuffer _InputVertexBuffer;
-RWByteAddressBuffer _InputPreviousVertexBuffer;
+RWStructuredBuffer<float3> _InputPreviousVertexBuffer;
 RWByteAddressBuffer _InputIndexBuffer;
 RWByteAddressBuffer _InputUVBuffer;
 
@@ -52,6 +53,9 @@ float4x4 _Offset;
 int _Layers;
 float _HeightOffset;
 float4 _UVScale;
+int _VertexCount;
+int _HairDelay;
+int _FrameCount;
 
 DrawVertex GetVertex(float3 position, float3 normal, float2 uv, float4 color)
 {
@@ -59,10 +63,11 @@ DrawVertex GetVertex(float3 position, float3 normal, float2 uv, float4 color)
     float3 pos = mul(_Offset, float4(position, 1.0));
     output.position = mul(_LocalToWorld, float4(pos, 1.0)).xyz;
     
-    // float3 prevPos = mul(_Offset, float4(color.yzw, 1.0));
-    // output.color.yzw = mul(_LocalToWorld, float4(prevPos, 1.0)).xyz;
+    float3 prevPos = mul(_Offset, float4(color.yzw, 1.0));
+    output.color.yzw = mul(_LocalToWorld, float4(prevPos, 1.0)).xyz;
+
+    //output.color = color;
     
-    output.color.yzw = color.yzw;
     output.normal = mul(_LocalToWorld, float4(normal, 0.0)).xyz;
     output.uv = uv;
     output.color.x = color.x;
@@ -128,26 +133,26 @@ void ShellTextureGeoAnim (uint3 id : SV_DispatchThreadID)
     InputVertex vertex0;
     vertex0.position = asfloat(_InputVertexBuffer.Load3(index1 * 40));
     vertex0.normal = asfloat(_InputVertexBuffer.Load3(index1 * 40 + 12));
-    vertex0.uv = asfloat(_InputUVBuffer.Load2(index1 * 8)) * _UVScale.xy;
+    vertex0.uv = asfloat(_InputUVBuffer.Load2(index1 * 8));
 
     InputVertex vertex1;
     vertex1.position = asfloat(_InputVertexBuffer.Load3(index2 * 40));
     vertex1.normal = asfloat(_InputVertexBuffer.Load3(index2 * 40 + 12));
-    vertex1.uv = asfloat(_InputUVBuffer.Load2(index2 * 8)) * _UVScale.xy;
+    vertex1.uv = asfloat(_InputUVBuffer.Load2(index2 * 8));
 
     InputVertex vertex2;
     vertex2.position = asfloat(_InputVertexBuffer.Load3(index3 * 40));
     vertex2.normal = asfloat(_InputVertexBuffer.Load3(index3 * 40 + 12));
-    vertex2.uv = asfloat(_InputUVBuffer.Load2(index3 * 8)) * _UVScale.xy;
+    vertex2.uv = asfloat(_InputUVBuffer.Load2(index3 * 8));
 
     float3 vel = float3(0,0,0);
     float3 vel1 = float3(0,0,0);
     float3 vel2 = float3(0,0,0);
 
     //Just loading these values in and assigning them to the drawVertices buffer makes it not render when Im not even using these values anywhere else
-    vel = asfloat(_InputPreviousVertexBuffer.Load3(index1 * 40));
-    vel1 = asfloat(_InputPreviousVertexBuffer.Load3(index2 * 40));
-    vel2 = asfloat(_InputPreviousVertexBuffer.Load3(index3 * 40));
+    vel = _InputPreviousVertexBuffer[index1 + _FrameCount % _HairDelay * _VertexCount];
+    vel1 = _InputPreviousVertexBuffer[index2 + _FrameCount % _HairDelay * _VertexCount];
+    vel2 = _InputPreviousVertexBuffer[index3 + _FrameCount % _HairDelay * _VertexCount];
     
     InputTriangle inputTriangle;
     inputTriangle.vertex0 = vertex0;
@@ -179,3 +184,20 @@ void ShellTextureGeoAnim (uint3 id : SV_DispatchThreadID)
     
     InterlockedAdd(_IndirectArgsBuffer[0].numVerticesPerInstance, 3 * _Layers);
 }
+
+[numthreads(64,1,1)]
+void PreviousVertex (uint3 id : SV_DispatchThreadID)
+{
+    int index1 = _InputIndexBuffer.Load((id.x * 3) * 4);
+    int index2 = _InputIndexBuffer.Load((id.x * 3 + 1) * 4);
+    int index3 = _InputIndexBuffer.Load((id.x * 3 + 2) * 4);
+
+    float3 pos1 = asfloat(_InputVertexBuffer.Load3(index1 * 40));
+    float3 pos2 = asfloat(_InputVertexBuffer.Load3(index2 * 40));
+    float3 pos3 = asfloat(_InputVertexBuffer.Load3(index3 * 40));
+
+    _InputPreviousVertexBuffer[index1 + _FrameCount % _HairDelay * _VertexCount] = pos1;
+    _InputPreviousVertexBuffer[index2 + _FrameCount % _HairDelay * _VertexCount] = pos2;
+    _InputPreviousVertexBuffer[index3 + _FrameCount % _HairDelay * _VertexCount] = pos3;
+}
+
