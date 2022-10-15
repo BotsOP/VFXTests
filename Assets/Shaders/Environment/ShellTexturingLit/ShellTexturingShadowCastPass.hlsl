@@ -4,7 +4,7 @@ struct Attributes {
 	uint id : SV_VertexID;
 };
 
-struct Interpolators {
+struct Varyings {
 	float4 positionCS : SV_POSITION;
 	float2 uv : TEXCOORD0;
 	float4 color : COLOR;
@@ -41,8 +41,8 @@ float4 GetShadowCasterPositionCS(float3 positionWS, float3 normalWS) {
 	return positionCS;
 }
 
-Interpolators Vertex(Attributes input) {
-	Interpolators output;
+Varyings Vertex(Attributes input) {
+	Varyings output;
 
 	DrawTriangle tri = _DrawTrianglesBuffer[input.id / 3];
 	DrawVertex v = tri.drawVertices[input.id  % 3];
@@ -60,7 +60,7 @@ Interpolators Vertex(Attributes input) {
 TEXTURE2D(_ColorMap); SAMPLER(sampler_ColorMap); 
 
 
-float4 Fragment(Interpolators input) : SV_TARGET {
+float4 Fragment(Varyings input) : SV_TARGET {
 	float tex = SAMPLE_TEXTURE2D(_ColorMap, sampler_ColorMap, input.uv).x;
 	clip(tex - input.color.x);
 	return 0;

@@ -16,7 +16,7 @@ struct Attributes {
 	uint id : SV_VertexID;
 };
 
-struct Interpolators {
+struct Varyings {
 	float4 positionCS : SV_POSITION;
 	float2 uv : TEXCOORD0;
 	float3 positionWS : TEXCOORD1;
@@ -128,8 +128,8 @@ float3 ChangeMagnitude(float3 vec, float newMag)
 	return vec;
 }
 
-Interpolators Vertex(Attributes input) {
-	Interpolators output;
+Varyings Vertex(Attributes input) {
+	Varyings output;
 
 	DrawTriangle tri = _DrawTrianglesBuffer[input.id / 3];
 	DrawVertex v = tri.drawVertices[input.id  % 3];
@@ -151,7 +151,7 @@ Interpolators Vertex(Attributes input) {
 	return output;
 }
 
-float4 Fragment(Interpolators input) : SV_TARGET{
+float4 Fragment(Varyings input) : SV_TARGET{
 	float2 uv = input.uv;
 	float4 color = SAMPLE_TEXTURE2D(_ColorMap, sampler_ColorMap, uv);
 	float tex = SAMPLE_TEXTURE2D(_NoiseMap, sampler_NoiseMap, uv * _NoiseMap_ST.xy).x;
