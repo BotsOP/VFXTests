@@ -102,13 +102,13 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _MaxHairLength: 2.52
+    - _MaxHairLength: 1
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 20
+    - _Smoothness: 0.16
     - _SmoothnessTextureChannel: 0
     - _SourceBlend: 1
     - _SpecularHighlights: 1
