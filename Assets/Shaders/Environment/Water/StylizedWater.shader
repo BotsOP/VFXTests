@@ -9,27 +9,17 @@ Shader "NedMakesGames/MyLit" {
         _Smoothness("Smoothness", Float) = 0
     }
     SubShader {
-        Tags {"RenderPipeline" = "UniversalPipeline"}
-
+        Tags {"RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry" "RenderType" = "Opaque"}
+        
         Pass {
-            Name "ForwardLit" // For debugging
-            Tags{"LightMode" = "UniversalForward"} // Pass specific tags. 
+            Name "ForwardLit"
+            Tags{"LightMode" = "UseColorTexture"}
+            
+            Zwrite off
 
-            HLSLPROGRAM // Begin HLSL code
+            HLSLPROGRAM
 
             #pragma shader_feature_local _NORMALMAP
-            #pragma shader_feature_local _PARALLAXMAP
-            #pragma shader_feature_local _RECEIVE_SHADOWS_OFF
-            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
-            #pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature_local_fragment _EMISSION
-            #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
-            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma shader_feature_local_fragment _OCCLUSIONMAP
-            #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
-            #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
             #pragma shader_feature_local_fragment _SPECULAR_SETUP
             #define _SPECULAR_COLOR
 

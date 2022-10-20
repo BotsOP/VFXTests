@@ -1,5 +1,24 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
+half3 CalculateWaterLighting(Light light, InputData inputData, SurfaceData surfaceData)
+{
+	half3 attenuatedLightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
+	half ndotl = saturate(dot(light.direction, inputData.normalWS));
+	half3 lightColor = ndotl * attenuatedLightColor;
 
+	lightColor *= surfaceData.albedo;
+
+	#if defined(_SPECGLOSSMAP) || defined(_SPECULAR_COLOR)
+	float3 halfVec = SafeNormalize(float3(light.direction) + float3(inputData.viewDirectionWS));
+	half NdotH = half(saturate(dot(inputData.normalWS, halfVec)));
+	half modifier = pow(NdotH, lerp(48, 500, surfaceData.smoothness));
+	half3 specularReflection = half4(surfaceData.specular, 1).rgb * modifier;
+	half3 specular = attenuatedLightColor * specularReflection;
+
+	lightColor += specular * surfaceData.smoothness;
+	#endif
+
+	return lightColor;
+}
 
 float4 LightingWater(SurfaceData surfaceData, InputData inputData)
 {
@@ -24,7 +43,7 @@ float4 LightingWater(SurfaceData surfaceData, InputData inputData)
 	LightingData lightingData = CreateLightingData(inputData, surfaceData);
 	if (IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers))
 	{
-		lightingData.mainLightColor += CalculateBlinnPhong(mainLight, inputData, surfaceData);
+		lightingData.mainLightColor += CalculateWaterLighting(mainLight, inputData, surfaceData);
 	}
 
 	#if defined(_ADDITIONAL_LIGHTS)
@@ -45,7 +64,7 @@ float4 LightingWater(SurfaceData surfaceData, InputData inputData)
 		Light light = GetAdditionalLight(lightIndex, inputData, shadowMask, aoFactor);
 	if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
 	{
-		lightingData.additionalLightsColor += CalculateBlinnPhong(light, inputData, surfaceData);
+		lightingData.additionalLightsColor += CalculateWaterLighting(light, inputData, surfaceData);
 	}
 	LIGHT_LOOP_END
 	#endif
@@ -57,30 +76,3 @@ float4 LightingWater(SurfaceData surfaceData, InputData inputData)
 	return CalculateFinalColor(lightingData, surfaceData.alpha);
 }
 
-half3 CalculateWaterLighting(Light light, InputData inputData, SurfaceData surfaceData)
-{
-	half3 attenuatedLightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
-	half3 lightColor = attenuatedLightColor * saturate(dot(light.direction, inputData.normalWS));
-
-	lightColor *= surfaceData.albedo;
-
-	#if defined(_SPECGLOSSMAP) || defined(_SPECULAR_COLOR)
-	half smoothness = exp2(10 * surfaceData.smoothness + 1);
-
-	float3 halfVec = SafeNormalize(float3(light.direction) + float3(inputData.viewDirectionWS));
-	half NdotH = half(saturate(dot(inputData.normalWS, halfVec)));
-	half modifier = pow(NdotH, smoothness);
-	half3 specularReflection = half4(surfaceData.specular, 1).rgb * modifier;
-	half3 specular = attenuatedLightColor * specularReflection;
-
-	half3 h = SafeNormalize(float3(light.direction) + float3(inputData.viewDirectionWS));
-	float nh = saturate(dot(inputData.normalWS, halfVec));
-	float spec = pow(nh, lerp(48, 500, surfaceData.smoothness));
-
-	lightColor += specular;
-	#endif
-
-	
-
-	return lightColor;
-}

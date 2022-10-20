@@ -37,6 +37,7 @@ struct Interpolators {
 	float3 normalWS : TEXCOORD2;
 	half4 tangentWS : TEXCOORD3;
 	half4 fogFactorAndVertexLight : TEXCOORD4;
+	half2 grabPassUV : TEXCOORD6;
 
 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
 	float4 shadowCoord              : TEXCOORD5;
@@ -121,14 +122,22 @@ Interpolators Vertex(Attributes input) {
 	return output;
 }
 
+sampler2D _GrabbedTexture;
+
 float4 Fragment(Interpolators input) : SV_TARGET{
 	float2 uv = input.uv;
-	// Sample the color map
-	float4 colorSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv);
+	float4 colorSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uv) * _BaseColor;
+
+	half3 samplingPos = input.positionWS;
+	half4 samplingScreenPos = mul(UNITY_MATRIX_VP, half4(samplingPos, 1.0));
+	half2 grabPassUV = (samplingScreenPos.xy / samplingScreenPos.w) * 0.5 + 0.5;
+	grabPassUV.y = 1.0 - grabPassUV.y;
+	
+	float4 background = tex2D(_GrabbedTexture, grabPassUV);
 	
 	SurfaceData surfaceInput = (SurfaceData)0;
-	surfaceInput.albedo = colorSample.rgb * _BaseColor.rgb;
-	surfaceInput.alpha = colorSample.a * _BaseColor.a;
+	surfaceInput.albedo = lerp(background, colorSample, colorSample.a).rgb;
+	surfaceInput.alpha = 1;
 	surfaceInput.specular = 1;
 	surfaceInput.smoothness = _Smoothness;
 	surfaceInput.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
