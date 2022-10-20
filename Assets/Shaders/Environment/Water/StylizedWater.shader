@@ -18,6 +18,19 @@ Shader "NedMakesGames/MyLit" {
             HLSLPROGRAM // Begin HLSL code
 
             #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _RECEIVE_SHADOWS_OFF
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+            #pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature_local_fragment _EMISSION
+            #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+            #pragma shader_feature_local_fragment _OCCLUSIONMAP
+            #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
+            #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
+            #pragma shader_feature_local_fragment _SPECULAR_SETUP
             #define _SPECULAR_COLOR
 
 #if UNITY_VERSION >= 202120
@@ -54,17 +67,3 @@ Shader "NedMakesGames/MyLit" {
     }
 }
 
-//float4 LightingWater(SurfaceOutputWater s, float3 lightDir, half3 viewDir, half atten)
-//{
-//	float4 col = float4(s.albedo, s.alpha);
-//	float ndotl = saturate(dot(s.normal, normalize(lightDir)));
-//	float shadow = ndotl * atten;
-//	col.rgb *= shadow;
-//
-//	half3 h = normalize(lightDir + viewDir);
-//	float nh = max(0, dot(s.normal, h));
-//	float spec = pow(nh, 48);
-//	col.rgb = spec * shadow;
-//
-//	return col;
-//}

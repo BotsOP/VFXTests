@@ -1,4 +1,5 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "WaterLighting.hlsl"
 
 TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap); 
 TEXTURE2D(_BumpMap); SAMPLER(sampler_BumpMap); 
@@ -44,16 +45,9 @@ struct Interpolators {
 
 half3 SampleNormal(float2 uv, TEXTURE2D_PARAM(bumpMap, sampler_bumpMap), half scale = half(1.0))
 {
-#ifdef _NORMALMAP
 	half4 n = SAMPLE_TEXTURE2D(bumpMap, sampler_bumpMap, uv);
-#if BUMP_SCALE_NOT_SUPPORTED
-	return UnpackNormal(n);
-#else
 	return UnpackNormalScale(n, scale);
-#endif
-#else
-	return half3(0.0h, 0.0h, 1.0h);
-#endif
+	return UnpackNormal(n);
 }
 
 void InitializeInputData(Interpolators input, half3 normalTS, out InputData inputData)
@@ -65,17 +59,12 @@ void InitializeInputData(Interpolators input, half3 normalTS, out InputData inpu
 #endif
 
     half3 viewDirWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
-#if defined(_NORMALMAP) || defined(_DETAIL)
     float sgn = input.tangentWS.w;      // should be either +1 or -1
     float3 bitangent = sgn * cross(input.normalWS.xyz, input.tangentWS.xyz);
     half3x3 tangentToWorld = half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz);
-#if defined(_NORMALMAP)
     inputData.tangentToWorld = tangentToWorld;
-#endif
     inputData.normalWS = TransformTangentToWorld(normalTS, tangentToWorld);
-#else
-    inputData.normalWS = input.normalWS;
-#endif
+    //inputData.normalWS = input.normalWS;
 
     inputData.normalWS = NormalizeNormalPerPixel(inputData.normalWS);
     inputData.viewDirectionWS = viewDirWS;
@@ -100,6 +89,15 @@ void InitializeInputData(Interpolators input, half3 normalTS, out InputData inpu
     inputData.vertexSH = input.vertexSH;
 #endif
 }
+
+struct SurfaceOutputWater
+{
+	half3 albedo;
+	half alpha;
+	half3 normal;
+};
+
+
 
 Interpolators Vertex(Attributes input) {
 	Interpolators output;
@@ -134,15 +132,12 @@ float4 Fragment(Interpolators input) : SV_TARGET{
 	surfaceInput.specular = 1;
 	surfaceInput.smoothness = _Smoothness;
 	surfaceInput.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
+	//return float4(surfaceInput.normalTS, 1);
 
 	InputData lightingInput = (InputData)0; // Found in URP/ShaderLib/Input.hlsl
 	InitializeInputData(input, surfaceInput.normalTS, lightingInput);
-	// lightingInput.positionWS = input.positionWS;
-	// lightingInput.normalWS = normalize(input.normalWS);
-	// lightingInput.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS); // In ShaderVariablesFunctions.hlsl
-	// lightingInput.shadowCoord = TransformWorldToShadowCoord(input.positionWS); // In Shadows.hlsl
 	
-	return UniversalFragmentPBR(lightingInput, surfaceInput);
+	return LightingWater(surfaceInput, lightingInput);
 
 #if UNITY_VERSION >= 202120
 	return UniversalFragmentBlinnPhong(lightingInput, surfaceInput);
