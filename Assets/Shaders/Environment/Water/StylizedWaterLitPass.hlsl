@@ -163,17 +163,18 @@ float4 Fragment(Interpolators input) : SV_TARGET{
 	
 	SurfaceData surfaceInput = (SurfaceData)0;
 	surfaceInput.albedo = lerp(_WaterBottomColor, _WaterTopColor, fogFactor);
-	surfaceInput.albedo = max(waterTex * _BaseColor, _WaterBottomColor) + _WaterTopColor;
+	//surfaceInput.albedo = max(waterTex * _BaseColor, _WaterBottomColor) + _WaterTopColor;
 	surfaceInput.emission = lerp(_WaterFogColor, background, fogFactor) * (1 - _BaseColor.a);
 	surfaceInput.alpha = _BaseColor.a;
 	surfaceInput.specular = 1;
 	surfaceInput.smoothness = _Smoothness;
 	surfaceInput.normalTS = float3(0, 0, 1);
+	surfaceInput.normalTS = normalTS;
 
 	InputData lightingInput = (InputData)0;
 	InitializeInputData(input, surfaceInput.normalTS, lightingInput);
 	
-	return UniversalFragmentPBR(lightingInput, surfaceInput);
+	return PBRLightingWater(lightingInput, surfaceInput);
 
 #if UNITY_VERSION >= 202120
 	return UniversalFragmentBlinnPhong(lightingInput, surfaceInput);

@@ -31,7 +31,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: e475b3e69c11c1d45887a88a06733056, type: 3}
+        m_Texture: {fileID: 2800000, guid: 9489e655f1b41534fa55f528bb54fcfa, type: 3}
         m_Scale: {x: 2, y: 2}
         m_Offset: {x: 1, y: 1}
     - _BumpMap2:
@@ -40,7 +40,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _CamTex:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _ColorMap:
         m_Texture: {fileID: 2800000, guid: d30b8fc89717b144f8799f197783b444, type: 3}
@@ -110,7 +110,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _Blend: 1
-    - _BumpScale: 0.5
+    - _BumpScale: 0.2
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -128,23 +128,23 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RefractionScale: 0
-    - _RefractionStrength: 0.095
+    - _RefractionStrength: 0.429
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SpecularSize: 0
     - _SrcBlend: 1
     - _Surface: 1
-    - _WaterFogDensity: 0.406
+    - _WaterFogDensity: 0.67
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.04286223, g: 0.13207549, b: 0.09484982, a: 0.69411767}
+    - _BaseColor: {r: 0.042862184, g: 0.13207543, b: 0.09484976, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorTint: {r: 1, g: 1, b: 1, a: 0.90588236}
     - _EmissionColor: {r: 23.181944, g: 12.418899, b: 5.133145, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _WaterBottomColor: {r: 0.15106799, g: 0.38679248, b: 0.33391973, a: 1}
-    - _WaterFogColor: {r: 0.35557136, g: 0.8301887, b: 0.79628444, a: 1}
-    - _WaterTopColor: {r: 0.06749733, g: 0.1509434, b: 0.14327998, a: 1}
+    - _WaterBottomColor: {r: 0.09878961, g: 0.23584908, b: 0.20386854, a: 1}
+    - _WaterFogColor: {r: 0.060590927, g: 0.8679245, b: 0.8112695, a: 1}
+    - _WaterTopColor: {r: 0.22634387, g: 0.6415094, b: 0.58092976, a: 1}
   m_BuildTextureStacks: []
