@@ -127,7 +127,7 @@ Shader "Universal Render Pipeline/Wireframe"
             {
                 //Diffuse
             	float3 N = normalize(i.normal);
-            	float3 Lpos = _MainLightPosition.xyz; 
+            	float3 Lpos = _MainLightPosition.xyz;
             	float3 L = normalize(Lpos); 
             	float3 lambert = saturate(dot(N, L));
             	float diffuseLight = lambert * _MainLightColor.xyz;

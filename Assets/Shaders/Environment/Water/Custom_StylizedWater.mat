@@ -128,18 +128,18 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RefractionScale: 0
-    - _RefractionStrength: 0.429
+    - _RefractionStrength: 0.32
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SpecularSize: 0
     - _SrcBlend: 1
     - _Surface: 1
-    - _WaterFogDensity: 0.67
+    - _WaterFogDensity: 0.9
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.042862184, g: 0.13207543, b: 0.09484976, a: 0}
+    - _BaseColor: {r: 0.042862162, g: 0.1320754, b: 0.09484973, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorTint: {r: 1, g: 1, b: 1, a: 0.90588236}
     - _EmissionColor: {r: 23.181944, g: 12.418899, b: 5.133145, a: 1}

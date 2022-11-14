@@ -35,6 +35,7 @@ struct Interpolators {
 	half4 tangentWS : TEXCOORD3;
 	half4 fogFactorAndVertexLight : TEXCOORD4;
 	half2 grabPassUV : TEXCOORD6;
+	float3 viewNormal : NORMAL;
 
 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
 	float4 shadowCoord              : TEXCOORD5;
@@ -113,11 +114,13 @@ Interpolators Vertex(Attributes input) {
 	output.normalWS = normInputs.normalWS;
 	output.positionWS = posnInputs.positionWS;
 	output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
+	output.viewNormal = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, input.normalOS));
 
 	return output;
 }
 
 sampler2D _GrabbedTexture;
+sampler2D _CameraDepthNormalsTexture ;
 TEXTURE2D(_CameraDepthTexture); SAMPLER(sampler_CameraDepthTexture); 
 TEXTURE2D(_CamTex); SAMPLER(sampler_CamTex); 
 float4 _IntersectionCamProperties;
@@ -156,10 +159,8 @@ float4 Fragment(Interpolators input) : SV_TARGET{
 		depthDifference = min(20, depthDifference);
 	}
 	float fogFactor = exp2(-_WaterFogDensity * depthDifference);
-
-	//Get color below water
+	
 	float4 background = tex2D(_GrabbedTexture, grabPassUV);
-	//background = SAMPLE_TEXTURE2D(_CamTex, sampler_CamTex, grabPassUV);
 	
 	SurfaceData surfaceInput = (SurfaceData)0;
 	surfaceInput.albedo = lerp(_WaterBottomColor, _WaterTopColor, fogFactor);
@@ -168,9 +169,8 @@ float4 Fragment(Interpolators input) : SV_TARGET{
 	surfaceInput.alpha = _BaseColor.a;
 	surfaceInput.specular = 1;
 	surfaceInput.smoothness = _Smoothness;
-	surfaceInput.normalTS = float3(0, 0, 1);
 	surfaceInput.normalTS = normalTS;
-
+	
 	InputData lightingInput = (InputData)0;
 	InitializeInputData(input, surfaceInput.normalTS, lightingInput);
 	

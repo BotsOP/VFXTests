@@ -1,0 +1,14 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SkinnedToMesh
+
+RWByteAddressBuffer bufVertices;
+RWByteAddressBuffer bufIndices;
+
+[numthreads(1,1,1)]
+void SkinnedToMesh (uint3 id : SV_DispatchThreadID)
+{
+    bufVertices.Store2(id.x * 8, asuint(float3(1, 1, 1)));
+}
+
+
+

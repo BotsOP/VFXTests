@@ -55,7 +55,7 @@ Material:
     - _CastShadows: 1
     - _Cull: 2
     - _DstBlend: 10
-    - _Lerp: 0
+    - _Lerp: 0.9382669
     - _NormalStrength: 1
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -75,7 +75,7 @@ Material:
     - _NoiseTile: {r: 1, g: 5, b: 0, a: 0}
     - _OriginOffset: {r: 0, g: 0, b: 0, a: 0}
     - _SpawnPoint: {r: 0.267, g: 1.203, b: 1.712, a: 0}
-    - _TargetPos: {r: 4.68, g: 1.497, b: -3.122, a: 0}
+    - _TargetPos: {r: 4.441, g: 1.402, b: -3.122, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &8980258179721763041
 MonoBehaviour:

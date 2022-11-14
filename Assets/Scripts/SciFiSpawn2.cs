@@ -125,7 +125,6 @@ public class SciFiSpawn2 : MonoBehaviour
         computeShader.SetBuffer(2, "bufIndices", gpuIndices);
         computeShader.SetBuffer(2, "bufUnderVertices", gpuUnderVertices);
 
-
         computeShader.Dispatch(2, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
 
         // Vertex0[] vertex0 = new Vertex0[charMesh.vertexCount];

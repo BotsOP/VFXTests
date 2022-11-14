@@ -15,11 +15,11 @@ Shader "NedMakesGames/MyLit" {
         _Smoothness("Smoothness", Float) = 0
     }
     SubShader {
-        Tags {"RenderPipeline" = "UniversalPipeline" "Queue" = "Transparent" "RenderType" = "Transparent"}
+        Tags {"RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry" "RenderType" = "Opaque"}
         
         Pass {
             Name "ForwardLit"
-            Tags{"LightMode" = "UseColorTexture" "Queue" = "Transparent" "RenderType" = "Transparent"}
+            Tags{"LightMode" = "UseColorTexture" "Queue" = "Geometry" "RenderType" = "Opaque"}
             
             Zwrite off
 
