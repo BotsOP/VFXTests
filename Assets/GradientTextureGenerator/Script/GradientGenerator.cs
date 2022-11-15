@@ -72,7 +72,7 @@ public class GradientGenerator : MonoBehaviour
                 _tempTexture.SetPixel(x, y, color);
             }
         }
-        _tempTexture.wrapMode = TextureWrapMode.Clamp;
+        _tempTexture.wrapMode = TextureWrapMode.Repeat;
         _tempTexture.Apply();
         return _tempTexture;
     }
