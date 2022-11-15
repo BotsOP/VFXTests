@@ -10,12 +10,11 @@ using Random = UnityEngine.Random;
 
 //Rigidbody is for the raycast to easily get the parent from any collider on the body
 [RequireComponent(typeof(Rigidbody))]
-public class SciFiTriangleDestruction : MonoBehaviour
+public class TriangleDestructionAnimated : MonoBehaviour, IHittable
 {
     [SerializeField] private ComputeShader computeShader;
     [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
     [SerializeField] private Material[] meshMats;
-    [SerializeField] private Transform rootBoneTransform;
     [SerializeField] private Gradient triangleOutlineGradient;
     private Gradient triangleOutlineGradientCheck;
     [SerializeField][Range(0, 0.5f)] private float explosionRadius = 0.1f;
@@ -25,7 +24,6 @@ public class SciFiTriangleDestruction : MonoBehaviour
     [SerializeField][Range(0, 5)] private float triangleEndTransition = 0.5f;
 
     private Mesh charMesh;
-    private Camera mainCam;
     private MeshFilter charMeshFilter;
     private Texture2D gradientTexture;
 
@@ -82,8 +80,6 @@ public class SciFiTriangleDestruction : MonoBehaviour
 
     private void OnEnable()
     {
-        mainCam = Camera.main;
-        
         SetMesh();
     }
     
@@ -103,8 +99,10 @@ public class SciFiTriangleDestruction : MonoBehaviour
     {
         UpdateChar();
 
-        charMeshTransform.position = rootBoneTransform.position;
-        charMeshTransform.rotation = rootBoneTransform.rotation;
+        Transform rootBone = skinnedMeshRenderer.rootBone;
+        charMeshTransform.position = rootBone.position;
+        charMeshTransform.rotation = rootBone.rotation;
+        charMeshTransform.localScale = rootBone.localScale;
     }
 
 
@@ -177,7 +175,7 @@ public class SciFiTriangleDestruction : MonoBehaviour
         animatedMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
 
         //Set vertex attributes of mesh
-        int vertexAttribCount = GetVertexAttribCount(animatedMesh) + 3;
+        int vertexAttribCount = MeshExtensions.GetVertexAttribCount(animatedMesh) + 3;
         VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
         skinnedMeshRenderer.sharedMesh.GetVertexAttributes(meshAttrib);
         
@@ -191,7 +189,7 @@ public class SciFiTriangleDestruction : MonoBehaviour
         //Set vertex attributes of skinned mesh
         if (!animatedMesh.HasVertexAttribute(VertexAttribute.TexCoord3))
         {
-            int skinnedVertexAttribCount = GetVertexAttribCount(animatedMesh) + 1;
+            int skinnedVertexAttribCount = MeshExtensions.GetVertexAttribCount(animatedMesh) + 1;
             VertexAttributeDescriptor[] skinnedMeshAttrib = new VertexAttributeDescriptor[skinnedVertexAttribCount];
             skinnedMeshRenderer.sharedMesh.GetVertexAttributes(skinnedMeshAttrib);
         
@@ -206,7 +204,7 @@ public class SciFiTriangleDestruction : MonoBehaviour
         animatedMesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
     }
 
-    public void HitPoint(Vector3 hitPos)
+    public void Hit(Vector3 hitPos)
     {
         Vector4 newTarget = charMeshTransform.worldToLocalMatrix.MultiplyPoint3x4(hitPos);
         computeShader.SetVector("target", newTarget);
@@ -218,53 +216,5 @@ public class SciFiTriangleDestruction : MonoBehaviour
                     
         computeShader.Dispatch(1, (charMesh.triangles.Length / 3 - 63) / 64 + 2, 1, 1);
     }
-
-    private int GetVertexAttribCount(Mesh mesh)
-    {
-        int count = 0;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.Color))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.Normal))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.Position))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.Tangent))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.BlendIndices))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.BlendWeight))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord0))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord1))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord2))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord3))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord4))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord5))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord6))
-            count++;
-        
-        if (mesh.HasVertexAttribute(VertexAttribute.TexCoord7))
-            count++;
-
-        return count;
-    }
 }
+

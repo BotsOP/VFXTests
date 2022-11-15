@@ -174,7 +174,7 @@ namespace UnityTemplateProjects
             {
                 if (Physics.Raycast(ray, out hit, 100, triangleDesturctionMask))
                 {
-                    hit.transform.gameObject.GetComponent<SciFiTriangleDestruction>().HitPoint(hit.point);
+                    hit.transform.gameObject.GetComponent<IHittable>().Hit(hit.point);
                 }
             }
             
