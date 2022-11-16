@@ -52,7 +52,7 @@ struct Varyings
 #endif
 
 #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
-    half3 viewDirTS                : TEXCOORD7;
+    half3 viewDirTS                : TEXCOORD14;
 #endif
 
     DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 8);
@@ -91,7 +91,7 @@ struct g2f {
 #endif
 
 #if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
-    half3 viewDirTS                : TEXCOORD7;
+    half3 viewDirTS                : TEXCOORD14;
 #endif
 
     DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 8);

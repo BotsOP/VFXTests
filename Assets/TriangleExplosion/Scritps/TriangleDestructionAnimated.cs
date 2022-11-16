@@ -102,7 +102,6 @@ public class TriangleDestructionAnimated : MonoBehaviour, IHittable
         Transform rootBone = skinnedMeshRenderer.rootBone;
         charMeshTransform.position = rootBone.position;
         charMeshTransform.rotation = rootBone.rotation;
-        charMeshTransform.localScale = rootBone.localScale;
     }
 
 

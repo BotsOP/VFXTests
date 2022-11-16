@@ -8,11 +8,11 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - TriangleDestruction
+  - 
   - Water
   - UI
   - RenderOnTop
-  - 
+  - TriangleDestruction
   - 
   - 
   - 
