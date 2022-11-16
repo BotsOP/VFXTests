@@ -41,7 +41,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _emissionStrength: 10
-    - _tiling: 10
+    - _tiling: 150
     - _time: 1
     m_Colors:
     - _Color: {r: 0, g: 0.8926094, b: 1, a: 1}
