@@ -1,0 +1,95 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel DiscoverMesh
+
+struct Vertex
+{
+    float3 pos;
+    float3 nor;
+    float4 tang;
+    float2 uv;
+};
+
+RWStructuredBuffer<Vertex> gpuVertices;
+StructuredBuffer<uint> gpuIndices;
+AppendStructuredBuffer<uint> gpuAdjacentTriangle;
+RWStructuredBuffer<uint> gpuCheckedIndices;
+RWStructuredBuffer<uint> gpuAdjacentTrianglesCounter;
+
+uint amountIndicesToCheck;
+
+bool EqualVector3(float3 a, float3 b)
+{
+    float dist = distance(a, b);
+    if(dist < 0.5)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool EqualVector3(float3 a[3], float3 b)
+{
+    float dist0 = distance(a[0], b);
+    float dist1 = distance(a[1], b);
+    float dist2 = distance(a[2], b);
+    if(dist0 < 0.01)
+    {
+        return true;
+    }
+    if(dist1 < 0.01)
+    {
+        return true;
+    }
+    if(dist2 < 0.01)
+    {
+        return true;
+    }
+    return false;
+}
+
+[numthreads(32,1,1)]
+void DiscoverMesh (uint3 id : SV_DispatchThreadID)
+{
+    uint i1 = gpuIndices[id.x * 3];
+    uint i2 = gpuIndices[id.x * 3 + 1];
+    uint i3 = gpuIndices[id.x * 3 + 2];
+    
+    float3 v1 = gpuVertices[i1].pos;
+    float3 v2 = gpuVertices[i2].pos;
+    float3 v3 = gpuVertices[i3].pos;
+
+    /*if(i1 or i2 or i3 == gpuCheckedIndices)
+     *      return;
+     *
+     * array float3 posities [amountIndicesToCheck]
+     * for(amountIndicesToCheck)
+     *      posities[i] = gpuVertices[gpuCheckedIndices[i].pos;
+     *      
+     * 
+     */
+
+    float3 v1Check = gpuVertices[0].pos;
+    float3 v2Check = gpuVertices[1].pos;
+    float3 v3Check = gpuVertices[2].pos;
+
+    float3 allPos[3];
+    allPos[0] = v1;
+    allPos[1] = v2;
+    allPos[2] = v3;
+
+
+    if(EqualVector3(allPos, v1Check) && EqualVector3(allPos, v2Check) ||
+        EqualVector3(allPos, v1Check) && EqualVector3(allPos, v3Check) ||
+        EqualVector3(allPos, v2Check) && EqualVector3(allPos, v3Check))
+    {
+        InterlockedAdd(gpuAdjacentTrianglesCounter[0], 3);
+        
+        gpuAdjacentTriangle.Append(i1);
+        gpuAdjacentTriangle.Append(i2);
+        gpuAdjacentTriangle.Append(i3);
+
+        gpuVertices[i1].uv = float2(1,1);
+        gpuVertices[i2].uv = float2(1,1);
+        gpuVertices[i3].uv = float2(1,1);
+    }
+}

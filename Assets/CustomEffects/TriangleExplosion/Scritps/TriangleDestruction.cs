@@ -14,7 +14,7 @@ public class TriangleDestruction : MonoBehaviour, IHittable
     [SerializeField] private Material[] meshMats;
     [SerializeField] private Gradient triangleOutlineGradient;
     private Gradient triangleOutlineGradientCheck;
-    [SerializeField][Range(0, 0.5f)] private float explosionRadius = 0.1f;
+    [SerializeField][Range(0, 2f)] private float explosionRadius = 0.1f;
     [SerializeField][Range(0, 3)] private float explosionDistance = 0.5f;
     [SerializeField][Range(0, 10)] private float triangleTotalTime = 5;
     [SerializeField][Range(0, 5)] private float triangleBeginTransition = 0.2f;
@@ -227,10 +227,10 @@ public class TriangleDestruction : MonoBehaviour, IHittable
             underMesh.SetVertexBufferParams(mesh.vertexCount, underMeshAttrib);
         }
         
-        foreach (var attribute in underMeshAttrib)
-        {
-            Debug.Log($"{attribute}");
-        }
+        // foreach (var attribute in underMeshAttrib)
+        // {
+        //     Debug.Log($"{attribute}");
+        // }
         
         underMeshFiler.sharedMesh = underMesh;
         underMeshRend.materials = meshMats;

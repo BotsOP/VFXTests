@@ -251,12 +251,12 @@ void geom(triangle Varyings IN[3], inout TriangleStream<g2f> triStream) {
     for (int i = 0; i < 3; i++)
     {
         o.barycentric = barycentricPositions[i];
+        o.displacement = IN[i].displacement;
         o.positionCS = IN[i].positionCS;
         o.vertexSH = IN[i].vertexSH;
         o.uv = IN[i].uv;
         o.normalWS = IN[i].normalWS;
         o.viewDirWS = IN[i].viewDirWS;
-        o.displacement = IN[i].displacement;
     
         #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
         o.positionWS = IN[i].positionWS;
