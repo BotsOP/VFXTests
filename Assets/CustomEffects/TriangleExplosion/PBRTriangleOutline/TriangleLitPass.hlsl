@@ -312,11 +312,11 @@ half4 LitPassFragment(g2f input) : SV_Target
     if(input.displacement.x > 0)
     {
         float3 unitWidth = fwidth(input.barycentric);
-        float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 1, input.barycentric);
+        float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 0.5, input.barycentric);
         float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
         
         float localTime = (_Time.y - input.displacement.y + 0.001) / _TotalTime;
-        float3 wireFrameColor = tex2D(_OutlineGradient, float2(localTime, 1)) * 10 * alpha;
+        float3 wireFrameColor = tex2D(_OutlineGradient, float2(0, 1)) * 10 * alpha;
         surfaceData.emission += wireFrameColor;
     }
 
