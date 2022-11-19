@@ -6,13 +6,16 @@ struct Vertex
     float3 pos;
     float3 nor;
     float4 tang;
-    float2 uv;
+    float uvx;
+    float uvy;
 };
 
-struct CheckedVertex
+struct CheckedTriangle
 {
-    uint index;
-    float3 pos;
+    uint index1;
+    uint index2;
+    uint index3;
+    float time;
 };
 
 RWStructuredBuffer<Vertex> gpuVertices;
@@ -20,8 +23,9 @@ StructuredBuffer<uint> gpuIndices;
 AppendStructuredBuffer<uint> gpuAdjacentTriangle;
 RWStructuredBuffer<uint> gpuCheckedIndices;
 RWStructuredBuffer<uint> gpuAdjacentTrianglesCounter;
-AppendStructuredBuffer<uint> debug;
+AppendStructuredBuffer<CheckedTriangle> gpuTrianglesFound;
 
+float currentTime;
 uint amountIndicesToCheck;
 
 bool EqualVector3(float3 a, float3 b)
@@ -101,17 +105,14 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
         {
             if(indexFound1 == 0)
             {
-                debug.Append(gpuCheckedIndices[j]);
                 indexFound1 = gpuCheckedIndices[j];
             }
             else if(indexFound2 == 0)
             {
-                debug.Append(gpuCheckedIndices[j]);
                 indexFound2 = gpuCheckedIndices[j];
             }
             else
             {
-                debug.Append(gpuCheckedIndices[j]);
                 indexFound3 = gpuCheckedIndices[j];
             }
             amountVertexMatch++;
@@ -120,8 +121,6 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
     
     if(amountVertexMatch >= 1)
     {
-        //InterlockedAdd(gpuAdjacentTrianglesCounter[0], 3);
-
         if(!(i1 == indexFound1 || i1 == indexFound2 || i1 == indexFound3))
         {
             InterlockedAdd(gpuAdjacentTrianglesCounter[0], 1);
@@ -137,12 +136,18 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
             InterlockedAdd(gpuAdjacentTrianglesCounter[0], 1);
             gpuAdjacentTriangle.Append(i3);
         }
-        // gpuAdjacentTriangle.Append(i1);
-        // gpuAdjacentTriangle.Append(i2);
-        // gpuAdjacentTriangle.Append(i3);
 
-        gpuVertices[i1].uv = float2(1,1);
-        gpuVertices[i2].uv = float2(1,1);
-        gpuVertices[i3].uv = float2(1,1);
+        gpuVertices[i1].uvx = 1;
+        gpuVertices[i2].uvx = 1;
+        gpuVertices[i3].uvx = 1;
+
+        CheckedTriangle tri;
+        tri.index1 = i1;
+        tri.index2 = i2;
+        tri.index3 = i3;
+        tri.time = currentTime;
+        gpuTrianglesFound.Append(tri);
+
+        //new buffer to add the indices and current time
     }
 }
