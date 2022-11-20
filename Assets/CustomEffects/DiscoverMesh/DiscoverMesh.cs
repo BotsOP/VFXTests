@@ -18,13 +18,14 @@ public class DiscoverMesh : MonoBehaviour
     private ComputeBuffer gpuAdjacentTriangle;
     private ComputeBuffer gpuAdjacentTrianglesCounter;
     private ComputeBuffer gpuTrianglesFound;
-    private ComputeBuffer debug;
 
     private Mesh targetMesh;
     private int kernelID;
     private int threadGroupSize;
     private int checkedIndicesCache;
     private bool doneDiscover;
+    private CheckedTriangle[] trisFound;
+    private int amountTriangles => targetMesh.triangles.Length / 3;
     private List<uint> checkedIndices = new();
     void OnDisable()
     {
@@ -40,8 +41,6 @@ public class DiscoverMesh : MonoBehaviour
         gpuAdjacentTrianglesCounter = null;
         gpuTrianglesFound?.Dispose();
         gpuTrianglesFound = null;
-        debug?.Dispose();
-        debug = null;
     }
     private void Awake()
     {
@@ -57,7 +56,7 @@ public class DiscoverMesh : MonoBehaviour
             new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, 0),
             new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 0)
         );
-        gpuCheckedIndices = new ComputeBuffer(3, 4, ComputeBufferType.Structured);
+        gpuCheckedIndices = new ComputeBuffer(amountTriangles, 4, ComputeBufferType.Structured, ComputeBufferMode.Dynamic);
         checkedIndices.Add(0);
         checkedIndices.Add(1);
         checkedIndices.Add(2);
@@ -67,8 +66,9 @@ public class DiscoverMesh : MonoBehaviour
         
         gpuAdjacentTrianglesCounter = new ComputeBuffer(1, 4, ComputeBufferType.Structured);
 
-        gpuTrianglesFound = new ComputeBuffer(targetMesh.triangles.Length / 3, 16, ComputeBufferType.Append);
+        gpuTrianglesFound = new ComputeBuffer(amountTriangles, 16, ComputeBufferType.Append);
         gpuTrianglesFound.SetCounterValue(0);
+        trisFound = new CheckedTriangle[amountTriangles];
     }
 
     private void Update()
@@ -93,7 +93,7 @@ public class DiscoverMesh : MonoBehaviour
 
         kernelID = discoverMeshShader.FindKernel("DiscoverMesh");
         discoverMeshShader.GetKernelThreadGroupSizes(kernelID, out uint threadGroupSizeX, out _, out _);
-        threadGroupSize = Mathf.CeilToInt((float)targetMesh.triangles.Length / 3 / threadGroupSizeX);
+        threadGroupSize = Mathf.CeilToInt((float)amountTriangles / threadGroupSizeX);
         
         discoverMeshShader.SetBuffer(kernelID,"gpuVertices", gpuVertices);
         discoverMeshShader.SetBuffer(kernelID,"gpuIndices", gpuIndices);
@@ -102,6 +102,8 @@ public class DiscoverMesh : MonoBehaviour
         discoverMeshShader.SetBuffer(kernelID,"gpuAdjacentTrianglesCounter", gpuAdjacentTrianglesCounter);
         discoverMeshShader.SetBuffer(kernelID,"gpuTrianglesFound", gpuTrianglesFound);
         discoverMeshShader.SetFloat("currentTime", Time.timeSinceLevelLoad);
+        discoverMeshShader.SetInt("amountIndicesToCheck", checkedIndices.Count);
+        gpuAdjacentTriangle.SetCounterValue(0);
         discoverMeshShader.Dispatch(kernelID, threadGroupSize, 1, 1);
 
         gpuAdjacentTrianglesCounter.GetData(amountAdjacentIndicesArr);
@@ -114,23 +116,18 @@ public class DiscoverMesh : MonoBehaviour
         }
         checkedIndices = checkedIndices.Distinct().ToList();
         
-        CheckedTriangle[] trisFound = new CheckedTriangle[targetMesh.triangles.Length / 3];
         gpuTrianglesFound.GetData(trisFound);
 
         Debug.Log(checkedIndices.Count);
-        if (checkedIndicesCache == checkedIndices.Count)
-        {
-            Debug.Log($"done discover");
-            doneDiscover = true;
-            return;
-        }
+        // if (checkedIndicesCache == checkedIndices.Count)
+        // {
+        //     Debug.Log($"done discover");
+        //     doneDiscover = true;
+        //     return;
+        // }
         checkedIndicesCache = checkedIndices.Count;
-
-        
         
         //Try having one big buffer instead of constantly creating smaller buffers
-        gpuCheckedIndices.Release();
-        gpuCheckedIndices = new ComputeBuffer(checkedIndices.Count, 4, ComputeBufferType.Structured);
         gpuCheckedIndices.SetData(checkedIndices);
     }
 
@@ -141,20 +138,4 @@ public class DiscoverMesh : MonoBehaviour
         
         
     }
-}
-
-struct CheckedTriangle
-{
-    uint index1;
-    uint index2;
-    uint index3;
-    float time;
-};
-
-struct Vertex
-{
-    public Vector3 pos;
-    public Vector3 nor;
-    public Vector4 tang;
-    public Vector2 uv;
 }
