@@ -1,6 +1,7 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel FindAdjacentTriangles
 #pragma kernel DiscoverMesh
+#pragma kernel FindClosestTriangle
 
 struct Vertex
 {
@@ -18,6 +19,11 @@ struct AdjacentTriangles
     int tri3TriangleIndex;
     int hasTriangleBeenVisited;
 };
+struct TriangleInProximity
+{
+    uint id;
+    float dist;
+};
 
 RWStructuredBuffer<Vertex> gpuVertices;
 StructuredBuffer<int> gpuIndices;
@@ -27,9 +33,15 @@ AppendStructuredBuffer<int> gpuTrianglesShouldCheckAppend;
 RWStructuredBuffer<int> gpuAmountTrianglesToCheck;
 RWStructuredBuffer<int> debug;
 
+RWStructuredBuffer<int> gpuAmountTrianglesInProximity;
+AppendStructuredBuffer<TriangleInProximity> gpuTrianglesInProximity;
+
 float currentTime;
+float distThreshold;
 int amountTriangles;
 int amountTrianglesToCheck;
+int amountTrianglesToColor;
+float3 hitPos;
 
 bool EqualVector3(float3 a, float3 b)
 {
@@ -137,51 +149,51 @@ void RemoveConnectingTriangleAdjaceny(int indexTriangleToCheck, int adjacentTria
 {
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex = -1;
     }
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex = -1;
     }
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex = -1;
     }
 
     
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex = -1;
     }
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex = -1;
     }
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex = -1;
     }
 
     
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex = -1;
     }
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex = -1;
     }
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex == indexTriangleToCheck)
     {
-        InterlockedAdd(debug[0], 1);
+        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex = -1;
     }
 }
@@ -193,7 +205,6 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
     {
         return;
     }
-    InterlockedAdd(debug[1], 1);
 
     int index1 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3];
     int index2 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3 + 1];
@@ -210,41 +221,48 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
     gpuVertices[index1].uvx = 1;
     gpuVertices[index2].uvx = 1;
     gpuVertices[index3].uvx = 1;
-
-    // if(adjacentTrianlge1 == 3 || adjacentTrianlge2 == 3 || adjacentTrianlge3 == 3)
-    // {
-    //     debug[5] = gpuTrianglesShouldCheck[id.x];
-    // }
-    // if(adjacentTrianlge1 == 4 || adjacentTrianlge2 == 4 || adjacentTrianlge3 == 4)
-    // {
-    //     debug[6] = gpuTrianglesShouldCheck[id.x];
-    // }
     
     if(adjacentTrianlge1 > 0 && gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
     {
         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge1);
         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
     }
-    else
-    {
-        InterlockedAdd(debug[2], 1);
-    }
     if(adjacentTrianlge2 > 0 && gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited == 0)
     {
         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge2);
         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
-    }
-    else
-    {
-        InterlockedAdd(debug[2], 1);
     }
     if(adjacentTrianlge3 > 0 && gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited == 0)
     {
         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
     }
-    else
+}
+
+[numthreads(32,1,1)]
+void FindClosestTriangle (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > (uint)amountTriangles)
     {
-        InterlockedAdd(debug[2], 1);
+        return;
+    }
+    uint index1 = gpuIndices[id.x * 3];
+    uint index2 = gpuIndices[id.x * 3 + 1];
+    uint index3 = gpuIndices[id.x * 3 + 2];
+    
+    float3 vertex1 = gpuVertices[index1].pos;
+    float3 vertex2 = gpuVertices[index2].pos;
+    float3 vertex3 = gpuVertices[index3].pos;
+    
+    float3 avgPos = (vertex1 + vertex2 + vertex3) / 3;
+    float dist = distance(avgPos, hitPos);
+    
+    if(dist < distThreshold)
+    {
+        InterlockedAdd(gpuAmountTrianglesInProximity[0], 1);
+        TriangleInProximity tri;
+        tri.id = id.x;
+        tri.dist = dist;
+        gpuTrianglesInProximity.Append(tri);
     }
 }
