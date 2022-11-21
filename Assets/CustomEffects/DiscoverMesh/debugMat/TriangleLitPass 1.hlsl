@@ -304,7 +304,7 @@ sampler2D _OutlineGradient;
 half4 LitPassFragment(g2f input) : SV_Target
 {
     float3 unitWidth = fwidth(input.barycentric);
-    float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 5, input.barycentric);
+    float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 1, input.barycentric);
     float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
     return float4(input.uv.x, input.uv.y, alpha, 1);
     UNITY_SETUP_INSTANCE_ID(input);

@@ -246,17 +246,14 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
 
     private void Update()
     {
-        if (start && Time.time > speed)
+        if (start && Time.frameCount % speed == 0)
         {
             if (!firstTimeStart)
             {
                 FirstTriangleToCheck();
                 firstTimeStart = true;
             }
-            while (start)
-            {
-                IncrementTriangles();
-            }
+            IncrementTriangles();
         }
     }
 }
