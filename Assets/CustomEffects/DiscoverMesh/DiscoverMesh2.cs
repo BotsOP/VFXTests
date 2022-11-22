@@ -21,6 +21,7 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     private ComputeBuffer gpuAdjacentTriangle;
     private ComputeBuffer gpuTrianglesShouldCheck;
     private ComputeBuffer gpuTrianglesShouldCheckAppend;
+    private ComputeBuffer gpuTrianglesToNotCheck;
     private ComputeBuffer gpuAmountTrianglesToCheck;
     
     private ComputeBuffer gpuAmountTrianglesInProximity;
@@ -71,7 +72,8 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         );
 
         gpuAdjacentTriangle = new ComputeBuffer(amountTriangles, sizeof(int) * 4, ComputeBufferType.Structured);
-        gpuTrianglesShouldCheckAppend = new ComputeBuffer(amountTriangles * 3, sizeof(int), ComputeBufferType.Append);
+        gpuTrianglesShouldCheckAppend = new ComputeBuffer(amountTriangles, sizeof(int), ComputeBufferType.Append);
+        gpuTrianglesToNotCheck = new ComputeBuffer(amountTriangles, sizeof(int) * 2, ComputeBufferType.Append);
         gpuAmountTrianglesToCheck = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Structured);
         
         gpuAmountTrianglesInProximity = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Structured);
@@ -127,13 +129,6 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         whichTrianglesToCheck = new int[1];
         whichTrianglesToCheck[0] = 0;
         gpuTrianglesShouldCheckAppend.SetData(whichTrianglesToCheck);
-        
-        gpuVertices ??= targetMesh.GetVertexBuffer(0);
-        gpuIndices ??= targetMesh.GetIndexBuffer();
-        
-        discoverMeshShader.SetBuffer(kernelID,"gpuVertices", gpuVertices);
-        discoverMeshShader.SetBuffer(kernelID,"gpuIndices", gpuIndices);
-        discoverMeshShader.SetInt("amountTriangles", amountTriangles);
     }
 
     public void IncrementTriangles()
@@ -157,17 +152,23 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         
         int[] amountTrianglesToCheckArrayEmpty = new int[1];
         gpuAmountTrianglesToCheck.SetData(amountTrianglesToCheckArrayEmpty);
-        int[] whichTrianglesToCheckEmpty = new int[amountTriangles * 3];
+        int[] whichTrianglesToCheckEmpty = new int[amountTriangles];
         gpuTrianglesShouldCheckAppend.SetData(whichTrianglesToCheckEmpty);
         
         kernelID = discoverMeshShader.FindKernel("DiscoverMesh");
         discoverMeshShader.GetKernelThreadGroupSizes(kernelID, out uint threadGroupSizeX, out _, out _);
         threadGroupSize = Mathf.CeilToInt(amountTrianglesToCheck / (float)threadGroupSizeX);
 
+        gpuVertices ??= targetMesh.GetVertexBuffer(0);
+        gpuIndices ??= targetMesh.GetIndexBuffer();
+        
+        discoverMeshShader.SetBuffer(kernelID,"gpuVertices", gpuVertices);
+        discoverMeshShader.SetBuffer(kernelID,"gpuIndices", gpuIndices);
         discoverMeshShader.SetInt("amountTrianglesToCheck", amountTrianglesToCheck);
         discoverMeshShader.SetBuffer(kernelID,"gpuTrianglesShouldCheck", gpuTrianglesShouldCheck);
         discoverMeshShader.SetBuffer(kernelID,"gpuTrianglesShouldCheckAppend", gpuTrianglesShouldCheckAppend);
         discoverMeshShader.SetBuffer(kernelID,"gpuAmountTrianglesToCheck", gpuAmountTrianglesToCheck);
+        discoverMeshShader.SetInt("amountTriangles", amountTriangles);
         discoverMeshShader.SetBuffer(kernelID,"gpuAdjacentTriangle", gpuAdjacentTriangle);
         gpuTrianglesShouldCheckAppend.SetCounterValue(0);
         discoverMeshShader.Dispatch(kernelID, threadGroupSize, 1, 1);

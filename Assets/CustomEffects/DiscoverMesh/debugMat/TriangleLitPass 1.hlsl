@@ -303,10 +303,7 @@ sampler2D _OutlineGradient;
 // Used in Standard (Physically Based) shader
 half4 LitPassFragment(g2f input) : SV_Target
 {
-    float3 unitWidth = fwidth(input.barycentric);
-    float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 1, input.barycentric);
-    float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
-    return float4(input.uv.x, input.uv.y, alpha, 1);
+    
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
@@ -323,7 +320,11 @@ half4 LitPassFragment(g2f input) : SV_Target
     SurfaceData surfaceData;
     InitializeStandardLitSurfaceData(input.uv, surfaceData);
 
+    float3 unitWidth = fwidth(input.barycentric);
+    float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 0.5, input.barycentric);
+    float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
     surfaceData.albedo = float3(input.uv.x, input.uv.x, input.uv.x);
+    //surfaceData.emission = float3(alpha * input.uv.x, alpha * input.uv.x, alpha * input.uv.x);
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
