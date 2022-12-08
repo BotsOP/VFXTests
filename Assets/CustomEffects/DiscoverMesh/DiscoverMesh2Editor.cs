@@ -13,7 +13,7 @@ public class DiscoverMesh2Editor : Editor
         DiscoverMesh2 discoverMesh = (DiscoverMesh2)target;
         if(GUILayout.Button("First Triangle"))
         {
-            discoverMesh.FirstTriangleToCheck();
+            discoverMesh.FirstTriangleToCheck(0);
         }
         if(GUILayout.Button("Find adjacent triange"))
         {

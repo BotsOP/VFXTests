@@ -2,6 +2,7 @@
 #pragma kernel FindAdjacentTriangles
 #pragma kernel DiscoverMesh
 #pragma kernel FindClosestTriangle
+#pragma kernel UpdateMesh
 
 struct Vertex
 {
@@ -41,6 +42,8 @@ float distThreshold;
 int amountTriangles;
 int amountTrianglesToCheck;
 int amountTrianglesToColor;
+int amountVerts;
+float decaySpeed;
 float3 hitPos;
 
 bool EqualVector3(float3 a, float3 b)
@@ -72,7 +75,7 @@ bool EqualVector3(float3 a[3], float3 b)
     return false;
 }
 
-[numthreads(32,1,1)]
+[numthreads(128,1,1)]
 void FindAdjacentTriangles (uint3 id : SV_DispatchThreadID)
 {
     if(id.x > (uint)amountTriangles)
@@ -148,57 +151,30 @@ void FindAdjacentTriangles (uint3 id : SV_DispatchThreadID)
 void RemoveConnectingTriangleAdjaceny(int indexTriangleToCheck, int adjacentTrianlge1, int adjacentTrianlge2, int adjacentTrianlge3)
 {
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex = -1;
-    }
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex = -1;
-    }
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex = -1;
-    }
 
-    
+
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex = -1;
-    }
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex = -1;
-    }
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex = -1;
-    }
 
-    
+
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex = -1;
-    }
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex = -1;
-    }
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex == indexTriangleToCheck)
-    {
-        //InterlockedAdd(debug[0], 1);
         gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex = -1;
-    }
 }
 
-[numthreads(32,1,1)]
+[numthreads(128,1,1)]
 void DiscoverMesh (uint3 id : SV_DispatchThreadID)
 {
     if(id.x >= (uint)amountTrianglesToCheck)
@@ -218,9 +194,9 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
 
     RemoveConnectingTriangleAdjaceny(gpuTrianglesShouldCheck[id.x], adjacentTrianlge1, adjacentTrianlge2, adjacentTrianlge3);
 
-    gpuVertices[index1].uvx = 1;
-    gpuVertices[index2].uvx = 1;
-    gpuVertices[index3].uvx = 1;
+    if(gpuVertices[index1].uvx == 0) { gpuVertices[index1].uvx = 1; }
+    if(gpuVertices[index2].uvx == 0) { gpuVertices[index2].uvx = 1; }
+    if(gpuVertices[index3].uvx == 0) { gpuVertices[index3].uvx = 1; }
     
     if(adjacentTrianlge1 > 0 && gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
     {
@@ -239,7 +215,7 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
     }
 }
 
-[numthreads(32,1,1)]
+[numthreads(128,1,1)]
 void FindClosestTriangle (uint3 id : SV_DispatchThreadID)
 {
     if(id.x > (uint)amountTriangles)
@@ -264,5 +240,22 @@ void FindClosestTriangle (uint3 id : SV_DispatchThreadID)
         tri.id = id.x;
         tri.dist = dist;
         gpuTrianglesInProximity.Append(tri);
+    }
+}
+
+[numthreads(128,1,1)]
+void UpdateMesh (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > (uint)amountVerts)
+    {
+        return;
+    }
+    float uvx = gpuVertices[id.x].uvx;
+
+    if(uvx > 0)
+    {
+        uvx -= decaySpeed;
+        uvx = uvx < 0 ? 0 : uvx;
+        gpuVertices[id.x].uvx = uvx;
     }
 }

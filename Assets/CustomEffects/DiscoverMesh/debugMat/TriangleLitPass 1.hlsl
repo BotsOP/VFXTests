@@ -182,7 +182,7 @@ Varyings LitPassVertex(Attributes input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz + input.normalOS * TRANSFORM_TEX(input.texcoord, _BaseMap).x * 0.05);
 
     // normalWS and tangentWS already normalize.
     // this is required to avoid skewing the direction during interpolation
@@ -244,23 +244,23 @@ float3 barycentricPositions[3];
 void geom(triangle Varyings IN[3], inout TriangleStream<g2f> triStream) {
     g2f o;
 
-    
     barycentricPositions[0] = float3(1.0, 0.0, 0.0);
     barycentricPositions[1] = float3(0.0, 1.0, 0.0);
     barycentricPositions[2] = float3(0.0, 0.0, 1.0);
+    
+    float uvx = 0;
+    float uvy = 0;
+    if(IN[0].uv.x > 0 || IN[1].uv.x > 0 || IN[2].uv.x > 0)
+    {
+        uvx = max(IN[0].uv.x, max(IN[1].uv.x, IN[2].uv.x));
+    }
+    if(IN[0].uv.y > 0 && IN[1].uv.y > 0 && IN[2].uv.y > 0)
+    {
+        uvy = 1;
+    }
 
     for (int i = 0; i < 3; i++)
     {
-        float uvx = 0;
-        float uvy = 0;
-        if(IN[0].uv.x > 0 && IN[1].uv.x > 0 && IN[2].uv.x > 0)
-        {
-            uvx = 1;
-        }
-        if(IN[0].uv.y > 0 && IN[1].uv.y > 0 && IN[2].uv.y > 0)
-        {
-            uvy = 1;
-        }
         o.barycentric = barycentricPositions[i];
         o.displacement = IN[i].displacement;
         o.positionCS = IN[i].positionCS;
