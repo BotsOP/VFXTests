@@ -3,6 +3,7 @@
 #pragma kernel DiscoverMesh
 #pragma kernel FindClosestTriangle
 #pragma kernel UpdateMesh
+#pragma kernel ColorOneTriangle
 
 struct Vertex
 {
@@ -43,6 +44,7 @@ int amountTriangles;
 int amountTrianglesToCheck;
 int amountTrianglesToColor;
 int amountVerts;
+int triangleIndexToColor;
 float decaySpeed;
 float3 hitPos;
 
@@ -186,33 +188,104 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
     int index2 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3 + 1];
     int index3 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3 + 2];
 
+    float uvx1 = gpuVertices[index1].uvx;
+    float uvx2 = gpuVertices[index2].uvx;
+    float uvx3 = gpuVertices[index3].uvx;
+
     int adjacentTrianlge1 = gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].tri1TriangleIndex;
     int adjacentTrianlge2 = gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].tri2TriangleIndex;
     int adjacentTrianlge3 = gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].tri3TriangleIndex;
 
     gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].hasTriangleBeenVisited = -1;
-
     RemoveConnectingTriangleAdjaceny(gpuTrianglesShouldCheck[id.x], adjacentTrianlge1, adjacentTrianlge2, adjacentTrianlge3);
 
-    if(gpuVertices[index1].uvx == 0) { gpuVertices[index1].uvx = 1; }
-    if(gpuVertices[index2].uvx == 0) { gpuVertices[index2].uvx = 1; }
-    if(gpuVertices[index3].uvx == 0) { gpuVertices[index3].uvx = 1; }
-    
-    if(adjacentTrianlge1 > 0 && gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
+    // if(uvx1 == 0) { gpuVertices[index1].uvx = 1; }
+    // if(uvx2 == 0) { gpuVertices[index2].uvx = 1; }
+    // if(uvx3 == 0) { gpuVertices[index3].uvx = 1; }
+    gpuVertices[index1].uvx = 2;
+    gpuVertices[index2].uvx = 2;
+    gpuVertices[index3].uvx = 2;
+
+    float adjacentUVArray[9];
+    if(adjacentTrianlge1 >= 0)
     {
-        gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge1);
-        InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+        adjacentUVArray[0] = gpuVertices[gpuIndices[adjacentTrianlge1 * 3]].uvx;
+        adjacentUVArray[1] = gpuVertices[gpuIndices[adjacentTrianlge1 * 3 + 1]].uvx;
+        adjacentUVArray[2] = gpuVertices[gpuIndices[adjacentTrianlge1 * 3 + 2]].uvx;
+        if(!(adjacentUVArray[0] >= 1 && adjacentUVArray[1] >= 1 && adjacentUVArray[2] >= 1))
+        {
+            if(gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
+            {
+                gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge1);
+                InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+            }
+        }
+        else
+        {
+            gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited = -1;
+        }
     }
-    if(adjacentTrianlge2 > 0 && gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited == 0)
+    if(adjacentTrianlge2 >= 0)
     {
-        gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge2);
-        InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+        adjacentUVArray[3] = gpuVertices[gpuIndices[adjacentTrianlge2 * 3]].uvx;
+        adjacentUVArray[4] = gpuVertices[gpuIndices[adjacentTrianlge2 * 3 + 1]].uvx;
+        adjacentUVArray[5] = gpuVertices[gpuIndices[adjacentTrianlge2 * 3 + 2]].uvx;
+        if(!(adjacentUVArray[3] >= 1 && adjacentUVArray[4] >= 1 && adjacentUVArray[5] >= 1))
+        {
+            if(gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited == 0)
+            {
+                gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge2);
+                InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+            }
+        }
+        else
+        {
+            gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited = -1;
+        }
     }
-    if(adjacentTrianlge3 > 0 && gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited == 0)
+    if(adjacentTrianlge3 >= 0)
     {
-        gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
-        InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+        adjacentUVArray[6] = gpuVertices[gpuIndices[adjacentTrianlge3 * 3]].uvx;
+        adjacentUVArray[7] = gpuVertices[gpuIndices[adjacentTrianlge3 * 3 + 1]].uvx;
+        adjacentUVArray[8] = gpuVertices[gpuIndices[adjacentTrianlge3 * 3 + 2]].uvx;
+        if(!(adjacentUVArray[6] >= 1 && adjacentUVArray[7] >= 1 && adjacentUVArray[8] >= 1))
+        {
+            if(gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited == 0)
+            {
+                gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
+                InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+            }
+        }
+        else
+        {
+            gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited = -1;
+        }
     }
+
+    // if(shouldContinue)
+    // {
+    //     if(adjacentTrianlge1 > 0 && gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
+    //     {
+    //         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge1);
+    //         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+    //     }
+    //     if(adjacentTrianlge2 > 0 && gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited == 0)
+    //     {
+    //         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge2);
+    //         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+    //     }
+    //     if(adjacentTrianlge3 > 0 && gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited == 0)
+    //     {
+    //         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
+    //         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+    //     }
+    // }
+    // else
+    // {
+    //     gpuVertices[index1].uvy = 1;
+    //     gpuVertices[index2].uvy = 1;
+    //     gpuVertices[index3].uvy = 1;
+    // }
 }
 
 [numthreads(128,1,1)]
@@ -252,10 +325,27 @@ void UpdateMesh (uint3 id : SV_DispatchThreadID)
     }
     float uvx = gpuVertices[id.x].uvx;
 
-    if(uvx > 0)
+    if(uvx >= 1)
+    {
+        uvx -= 0.1;
+        gpuVertices[id.x].uvx = uvx;
+    }
+    else if(uvx > 0)
     {
         uvx -= decaySpeed;
         uvx = uvx < 0 ? 0 : uvx;
         gpuVertices[id.x].uvx = uvx;
     }
+}
+
+[numthreads(1,1,1)]
+void ColorOneTriangle (uint3 id : SV_DispatchThreadID)
+{
+    int index1 = gpuIndices[triangleIndexToColor * 3];
+    int index2 = gpuIndices[triangleIndexToColor * 3 + 1];
+    int index3 = gpuIndices[triangleIndexToColor * 3 + 2];
+
+    gpuVertices[index1].uvx = 1;
+    gpuVertices[index2].uvx = 1;
+    gpuVertices[index3].uvx = 1;
 }

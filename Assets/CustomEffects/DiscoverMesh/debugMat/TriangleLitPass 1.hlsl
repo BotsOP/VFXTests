@@ -182,7 +182,7 @@ Varyings LitPassVertex(Attributes input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz + input.normalOS * TRANSFORM_TEX(input.texcoord, _BaseMap).x * 0.05);
+    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
 
     // normalWS and tangentWS already normalize.
     // this is required to avoid skewing the direction during interpolation
@@ -250,13 +250,13 @@ void geom(triangle Varyings IN[3], inout TriangleStream<g2f> triStream) {
     
     float uvx = 0;
     float uvy = 0;
-    if(IN[0].uv.x > 0 || IN[1].uv.x > 0 || IN[2].uv.x > 0)
+    if(IN[0].uv.x > 0 && IN[1].uv.x > 0 && IN[2].uv.x > 0)
     {
         uvx = max(IN[0].uv.x, max(IN[1].uv.x, IN[2].uv.x));
     }
     if(IN[0].uv.y > 0 && IN[1].uv.y > 0 && IN[2].uv.y > 0)
     {
-        uvy = 1;
+        uvy = max(IN[0].uv.y, max(IN[1].uv.y, IN[2].uv.y));
     }
 
     for (int i = 0; i < 3; i++)
@@ -323,7 +323,7 @@ half4 LitPassFragment(g2f input) : SV_Target
     float3 unitWidth = fwidth(input.barycentric);
     float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 0.5, input.barycentric);
     float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
-    surfaceData.albedo = float3(input.uv.x, input.uv.x, input.uv.x);
+    surfaceData.albedo = float3(input.uv.x, input.uv.y, input.uv.y);
     //surfaceData.emission = float3(alpha * input.uv.x, alpha * input.uv.x, alpha * input.uv.x);
 
     InputData inputData;

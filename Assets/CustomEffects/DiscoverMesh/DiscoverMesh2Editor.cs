@@ -13,11 +13,16 @@ public class DiscoverMesh2Editor : Editor
         DiscoverMesh2 discoverMesh = (DiscoverMesh2)target;
         if(GUILayout.Button("First Triangle"))
         {
-            discoverMesh.FirstTriangleToCheck(0);
+            for (int i = 0; i < discoverMesh.whichTriangleToColor.Length; i++)
+            {
+                discoverMesh.FirstTriangleToCheck(discoverMesh.whichTriangleToColor[i]);
+            }
+            
         }
         if(GUILayout.Button("Find adjacent triange"))
         {
             discoverMesh.IncrementTriangles();
+            discoverMesh.UpdateMesh();
         }
         if(GUILayout.Button("Color triangles"))
         {
