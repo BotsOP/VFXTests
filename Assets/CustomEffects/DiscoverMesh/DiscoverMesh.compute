@@ -46,6 +46,7 @@ int amountTrianglesToColor;
 int amountVerts;
 int triangleIndexToColor;
 float decaySpeed;
+bool reverseDirection;
 float3 hitPos;
 
 bool EqualVector3(float3 a, float3 b)
@@ -152,28 +153,30 @@ void FindAdjacentTriangles (uint3 id : SV_DispatchThreadID)
 
 void RemoveConnectingTriangleAdjaceny(int indexTriangleToCheck, int adjacentTrianlge1, int adjacentTrianlge2, int adjacentTrianlge3)
 {
+    int value;
+    indexTriangleToCheck = abs(indexTriangleToCheck);
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex, value);
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex, value);
     if(gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex, value);
 
 
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex, value);
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex, value);
     if(gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex, value);
 
 
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex, value);
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex, value);
     if(gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex == indexTriangleToCheck)
-        gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex = -1;
+        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex, value);
 }
 
 [numthreads(128,1,1)]
@@ -184,108 +187,110 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    int index1 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3];
-    int index2 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3 + 1];
-    int index3 = gpuIndices[gpuTrianglesShouldCheck[id.x] * 3 + 2];
+    int triangleIndex = gpuTrianglesShouldCheck[id.x];
+    int index1 = gpuIndices[triangleIndex * 3];
+    int index2 = gpuIndices[triangleIndex * 3 + 1];
+    int index3 = gpuIndices[triangleIndex * 3 + 2];
 
-    float uvx1 = gpuVertices[index1].uvx;
-    float uvx2 = gpuVertices[index2].uvx;
-    float uvx3 = gpuVertices[index3].uvx;
+    int adjacentTrianlge1 = gpuAdjacentTriangle[triangleIndex].tri1TriangleIndex;
+    int adjacentTrianlge2 = gpuAdjacentTriangle[triangleIndex].tri2TriangleIndex;
+    int adjacentTrianlge3 = gpuAdjacentTriangle[triangleIndex].tri3TriangleIndex;
 
-    int adjacentTrianlge1 = gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].tri1TriangleIndex;
-    int adjacentTrianlge2 = gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].tri2TriangleIndex;
-    int adjacentTrianlge3 = gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].tri3TriangleIndex;
+    int value;
+    if(reverseDirection)
+    {
+        InterlockedExchange(gpuAdjacentTriangle[triangleIndex].hasTriangleBeenVisited, 1, value);
+    }
+    else
+    {
+        InterlockedExchange(gpuAdjacentTriangle[triangleIndex].hasTriangleBeenVisited, -1, value);
+    }
+    
+    RemoveConnectingTriangleAdjaceny(triangleIndex, adjacentTrianlge1, adjacentTrianlge2, adjacentTrianlge3);
 
-    gpuAdjacentTriangle[gpuTrianglesShouldCheck[id.x]].hasTriangleBeenVisited = -1;
-    RemoveConnectingTriangleAdjaceny(gpuTrianglesShouldCheck[id.x], adjacentTrianlge1, adjacentTrianlge2, adjacentTrianlge3);
-
-    // if(uvx1 == 0) { gpuVertices[index1].uvx = 1; }
-    // if(uvx2 == 0) { gpuVertices[index2].uvx = 1; }
-    // if(uvx3 == 0) { gpuVertices[index3].uvx = 1; }
     gpuVertices[index1].uvx = 2;
     gpuVertices[index2].uvx = 2;
     gpuVertices[index3].uvx = 2;
 
     float adjacentUVArray[9];
-    if(adjacentTrianlge1 >= 0)
+    if(!reverseDirection && adjacentTrianlge1 >= 0 || reverseDirection && adjacentTrianlge1 <= 0)
     {
         adjacentUVArray[0] = gpuVertices[gpuIndices[adjacentTrianlge1 * 3]].uvx;
         adjacentUVArray[1] = gpuVertices[gpuIndices[adjacentTrianlge1 * 3 + 1]].uvx;
         adjacentUVArray[2] = gpuVertices[gpuIndices[adjacentTrianlge1 * 3 + 2]].uvx;
-        if(!(adjacentUVArray[0] >= 1 && adjacentUVArray[1] >= 1 && adjacentUVArray[2] >= 1))
+        if(adjacentUVArray[0] >= 1 && adjacentUVArray[1] >= 1 && adjacentUVArray[2] >= 1)
         {
-            if(gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
+            if(reverseDirection)
             {
+                InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited, 1, value);
+            }
+            else
+            {
+                InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited, -1, value);
+            }
+        }
+        else
+        {
+            if(gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited >= 0 || reverseDirection && gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited <= 0)
+            {
+                //gpuAdjacentTriangle[triangleIndex].tri1TriangleIndex = -adjacentTrianlge1;
                 gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge1);
                 InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
             }
         }
-        else
-        {
-            gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited = -1;
-        }
     }
-    if(adjacentTrianlge2 >= 0)
+    if(!reverseDirection && adjacentTrianlge2 >= 0 || reverseDirection && adjacentTrianlge2 <= 0)
     {
         adjacentUVArray[3] = gpuVertices[gpuIndices[adjacentTrianlge2 * 3]].uvx;
         adjacentUVArray[4] = gpuVertices[gpuIndices[adjacentTrianlge2 * 3 + 1]].uvx;
         adjacentUVArray[5] = gpuVertices[gpuIndices[adjacentTrianlge2 * 3 + 2]].uvx;
-        if(!(adjacentUVArray[3] >= 1 && adjacentUVArray[4] >= 1 && adjacentUVArray[5] >= 1))
+        if(adjacentUVArray[3] >= 1 && adjacentUVArray[4] >= 1 && adjacentUVArray[5] >= 1)
         {
-            if(gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited == 0)
+            if(reverseDirection)
             {
+                InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited, 1, value);
+            }
+            else
+            {
+                InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited, -1, value);
+            }
+        }
+        else
+        {
+            if(!reverseDirection && gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited >= 0 || reverseDirection && gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited <= 0)
+            {
+                //gpuAdjacentTriangle[triangleIndex].tri2TriangleIndex = -adjacentTrianlge2;
                 gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge2);
                 InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
             }
         }
-        else
-        {
-            gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited = -1;
-        }
     }
-    if(adjacentTrianlge3 >= 0)
+    if(!reverseDirection && adjacentTrianlge3 >= 0 || reverseDirection && adjacentTrianlge3 <= 0)
     {
         adjacentUVArray[6] = gpuVertices[gpuIndices[adjacentTrianlge3 * 3]].uvx;
         adjacentUVArray[7] = gpuVertices[gpuIndices[adjacentTrianlge3 * 3 + 1]].uvx;
         adjacentUVArray[8] = gpuVertices[gpuIndices[adjacentTrianlge3 * 3 + 2]].uvx;
-        if(!(adjacentUVArray[6] >= 1 && adjacentUVArray[7] >= 1 && adjacentUVArray[8] >= 1))
+        if(adjacentUVArray[6] >= 1 && adjacentUVArray[7] >= 1 && adjacentUVArray[8] >= 1)
         {
-            if(gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited == 0)
+            if(reverseDirection)
             {
-                gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
-                InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+                InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited, 1, value);
+            }
+            else
+            {
+                InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited, -1, value);
             }
         }
         else
         {
-            gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited = -1;
+            if(gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited >= 0 || reverseDirection && gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited <= 0)
+            {
+                //gpuAdjacentTriangle[triangleIndex].tri3TriangleIndex = -adjacentTrianlge3;
+                gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
+                InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+            }
         }
     }
-
-    // if(shouldContinue)
-    // {
-    //     if(adjacentTrianlge1 > 0 && gpuAdjacentTriangle[adjacentTrianlge1].hasTriangleBeenVisited == 0)
-    //     {
-    //         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge1);
-    //         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
-    //     }
-    //     if(adjacentTrianlge2 > 0 && gpuAdjacentTriangle[adjacentTrianlge2].hasTriangleBeenVisited == 0)
-    //     {
-    //         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge2);
-    //         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
-    //     }
-    //     if(adjacentTrianlge3 > 0 && gpuAdjacentTriangle[adjacentTrianlge3].hasTriangleBeenVisited == 0)
-    //     {
-    //         gpuTrianglesShouldCheckAppend.Append(adjacentTrianlge3);
-    //         InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
-    //     }
-    // }
-    // else
-    // {
-    //     gpuVertices[index1].uvy = 1;
-    //     gpuVertices[index2].uvy = 1;
-    //     gpuVertices[index3].uvy = 1;
-    // }
 }
 
 [numthreads(128,1,1)]

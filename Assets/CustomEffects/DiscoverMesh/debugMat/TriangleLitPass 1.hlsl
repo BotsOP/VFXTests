@@ -252,7 +252,8 @@ void geom(triangle Varyings IN[3], inout TriangleStream<g2f> triStream) {
     float uvy = 0;
     if(IN[0].uv.x > 0 && IN[1].uv.x > 0 && IN[2].uv.x > 0)
     {
-        uvx = max(IN[0].uv.x, max(IN[1].uv.x, IN[2].uv.x));
+        //uvx = max(IN[0].uv.x, max(IN[1].uv.x, IN[2].uv.x));
+        uvx = 1;
     }
     if(IN[0].uv.y > 0 && IN[1].uv.y > 0 && IN[2].uv.y > 0)
     {
@@ -323,7 +324,8 @@ half4 LitPassFragment(g2f input) : SV_Target
     float3 unitWidth = fwidth(input.barycentric);
     float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * 0.5, input.barycentric);
     float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
-    surfaceData.albedo = float3(input.uv.x, input.uv.y, input.uv.y);
+    float uvx = saturate(input.uv.x);
+    surfaceData.albedo = uvx;
     //surfaceData.emission = float3(alpha * input.uv.x, alpha * input.uv.x, alpha * input.uv.x);
 
     InputData inputData;

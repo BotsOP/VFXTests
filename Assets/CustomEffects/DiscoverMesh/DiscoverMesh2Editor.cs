@@ -22,7 +22,7 @@ public class DiscoverMesh2Editor : Editor
         if(GUILayout.Button("Find adjacent triange"))
         {
             discoverMesh.IncrementTriangles();
-            discoverMesh.UpdateMesh();
+            discoverMesh.DecayMesh();
         }
         if(GUILayout.Button("Color triangles"))
         {
