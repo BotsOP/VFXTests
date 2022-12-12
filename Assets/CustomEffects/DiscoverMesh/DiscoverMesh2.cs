@@ -42,6 +42,7 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     private int[] whichTrianglesToCheck;
     private int[] emptyArray;
     private AdjacentTriangles[] adjacentTrianglesArray;
+    [SerializeField] private bool decay;
 
     private int amountTriangles => targetMesh.triangles.Length / 3;
     private int amountEffectsRunning => gpuAdjacentTriangleList.Count;
@@ -266,11 +267,31 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
                 lowestDistTri = tri;
             }
         }
+        int lowestTri = (int)lowestDistTri.id;
         if (!debug)
         {
-            FirstTriangleToCheck((int)lowestDistTri.id);
+            FirstTriangleToCheck(lowestTri);
+            Debug.Log($"{lowestTri}");
         }
-        Debug.Log($"{(int)lowestDistTri.id}");
+        else
+        {
+            int[] indices = targetMesh.triangles;
+            Vertex[] vertices = new Vertex[targetMesh.vertexCount];
+            gpuVertices ??= targetMesh.GetVertexBuffer(0);
+            gpuVertices.GetData(vertices);
+
+            int index1 = indices[lowestTri * 3];
+            int index2 = indices[lowestTri * 3 + 1];
+            int index3 = indices[lowestTri * 3 + 2];
+            
+            adjacentTrianglesArray = new AdjacentTriangles[amountTriangles];
+            gpuAdjacentTriangleList[0].GetData(adjacentTrianglesArray);
+
+            AdjacentTriangles adjTri = adjacentTrianglesArray[lowestTri];
+
+            Debug.Log($"ID: {(int)lowestDistTri.id} UVS: {vertices[index1].uv.x}, {vertices[index2].uv.x}, {vertices[index3].uv.x} " +
+                      $"Tri: {adjTri.tri1TriangleIndex}, {adjTri.tri2TriangleIndex}, {adjTri.tri3TriangleIndex}, {adjTri.hasTriangleBeenVisited}");
+        }
     }
 
     public void ColorTriangles()
@@ -304,7 +325,11 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     {
         if (start)
         {
-            //IncrementTriangles();
+            IncrementTriangles();
+            DecayMesh();
+        }
+        if (decay)
+        {
             DecayMesh();
         }
     }
