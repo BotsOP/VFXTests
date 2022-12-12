@@ -6414,6 +6414,53 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 896011868}
   m_Mesh: {fileID: 4300000, guid: 47616bd0cda748d4cbedcfc908506b9d, type: 3}
+--- !u!28 &902183754
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 256
+  m_Height: 1
+  m_CompleteImageSize: 2044
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 9
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMasterTextureLimit: 0
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 1
+  m_PlatformBlob: 
+  image data: 2044
+  _typelessdata: ff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4e4effff4e4effff4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffa4e4efffa4e4efffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfff94d4dfff94d4dfff94d4dfff94d4dfff94d4dfff94d4dfff94d4dfff84d4dfff64c4cfff44c4cfff24c4cfff14b4bffef4b4bffed4a4affeb4a4affea4a4affe84949ffe64949ffe44848ffe34848ffe14747ffdf4747ffdd4747ffdc4646ffda4646ffd84545ffd64545ffd54545ffd34444ffd14444ffcf4343ffce4343ffcc4242ffca4242ffc84242ffc74141ffc54141ffc34040ffc14040ffc04040ffbe3f3fffbc3f3fffba3e3effb93e3effb73e3effb53d3dffb33d3dffb23c3cffb03c3cffae3b3bffac3b3bffab3b3bffa93a3affa73a3affa53939ffa43939ffa23939ffa03838ff9e3838ff9d3737ff9b3737ff993636ff973636ff963636ff943535ff923535ff903434ff8f3434ff8d3434ff8b3333ff893333ff883232ff863232ff843232ff823131ff813131ff7f3030ff7d3030ff7b2f2fff7a2f2fff782f2fff762e2eff742e2eff732d2dff712d2dff6f2d2dff6d2c2cff6c2c2cff6a2b2bff682b2bff662a2aff652a2aff632a2aff612929ff5f2929ff5e2828ff5c2828ff5a2828ff592727ff572727ff552626ff532626ff522626ff502525ff4e2525ff4c2424ff4b2424ff492323ff472323ff452323ff442222ff422222ff402121ff3e2121ff3d2121ff3b2020ff392020ff371f1fff361f1fff341f1fff321e1eff301e1eff2f1d1dff2d1d1dff2b1c1cff291c1cff281c1cff261b1bffff4f4fffff4f4fffff4f4fffff4f4fffff4e4effff4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffa4e4efffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfff94d4dfff94d4dfff94d4dfff84d4dfff54c4cfff14b4bffee4a4affea4a4affe74949ffe34848ffe04747ffdc4646ffd94545ffd54545ffd24444ffce4343ffcb4242ffc74141ffc44040ffc04040ffbd3f3fffb93e3effb63d3dffb23c3cffaf3b3bffab3b3bffa83a3affa43939ffa13838ff9d3737ff9a3636ff963636ff933535ff8f3434ff8c3333ff883232ff853232ff813131ff7e3030ff7a2f2fff772e2eff732d2dff702d2dff6c2c2cff692b2bff652a2aff622929ff5e2828ff5b2828ff582727ff542626ff512525ff4d2424ff4a2323ff462323ff432222ff3f2121ff3c2020ff381f1fff351f1fff311e1eff2e1d1dff2a1c1cff271b1bffff4f4fffff4f4fffff4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfff94d4dfff84d4dfff34b4bffec4a4affe54848ffde4646ffd74545ffd04343ffc94141ffc24040ffbb3e3effb43c3cffad3b3bffa63939ff9f3737ff983636ff913434ff8a3232ff833131ff7c2f2fff752d2dff6e2c2cff672a2aff602828ff592727ff522525ff4b2323ff442222ff3d2020ff361f1fff2f1d1dff281b1bffff4f4ffffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffa4d4dfffa4d4dfffa4d4dfff84d4dffef4a4affe14747ffd34444ffc54040ffb73d3dffa93a3aff9b3636ff8d3333ff7f3030ff712c2cff632929ff552626ff472222ff391f1fff2b1c1cfffe4e4efffe4e4efffd4e4efffc4e4efffc4e4efffb4e4efffa4d4dfffa4d4dfff34b4bffda4545ffbe3e3effa23838ff863131ff6a2a2aff4e2424ff321d1dfffe4e4efffc4e4efffb4e4efffa4d4dffe64848ffb03b3bff782d2dff402020fffd4e4efffa4d4dffcb4141ff5c2626fffb4d4dff933333ffc74040ff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &907328521
 GameObject:
   m_ObjectHideFlags: 0
@@ -9780,6 +9827,8 @@ MonoBehaviour:
   discoverMeshShader: {fileID: 7200000, guid: 1a6035cf444d03e448504b858434f2a0, type: 3}
   meshFilter: {fileID: 1133186803}
   speed: 1
+  reverseTime: 70
+  beforeReverseWait: 80
   decaySpeed: 0.0207
   start: 1
   distThreshold: 0.1
@@ -9787,8 +9836,8 @@ MonoBehaviour:
   reverseDirection: 0
   test: 0
   debug: 0
-  whichTriangleToColor: d7110000
   decay: 0
+  whichTriangleToColor: d7110000
 --- !u!54 &1382623824
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -11076,6 +11125,8 @@ MonoBehaviour:
   discoverMeshShader: {fileID: 7200000, guid: 1a6035cf444d03e448504b858434f2a0, type: 3}
   meshFilter: {fileID: 1895226955}
   speed: 5
+  reverseTime: 30
+  beforeReverseWait: 20
   decaySpeed: 0
   start: 0
   distThreshold: 1
@@ -11083,8 +11134,8 @@ MonoBehaviour:
   reverseDirection: 0
   test: 0
   debug: 0
-  whichTriangleToColor: 00000000
   decay: 0
+  whichTriangleToColor: 00000000
 --- !u!54 &1545717935
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -13956,7 +14007,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OutlineGradient:
-        m_Texture: {fileID: 1981251630}
+        m_Texture: {fileID: 902183754}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -14239,53 +14290,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a52091085b76a804eb8798cff7cbe707, type: 3}
   m_PrefabInstance: {fileID: 1978986519}
   m_PrefabAsset: {fileID: 0}
---- !u!28 &1981251630
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
-  m_Width: 256
-  m_Height: 1
-  m_CompleteImageSize: 2044
-  m_MipsStripped: 0
-  m_TextureFormat: 4
-  m_MipCount: 9
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMasterTextureLimit: 0
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 2044
-  _typelessdata: ff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4f4fffff4e4effff4e4effff4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffa4e4efffa4e4efffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfff94d4dfff94d4dfff94d4dfff94d4dfff94d4dfff94d4dfff94d4dfff84d4dfff64c4cfff44c4cfff24c4cfff14b4bffef4b4bffed4a4affeb4a4affea4a4affe84949ffe64949ffe44848ffe34848ffe14747ffdf4747ffdd4747ffdc4646ffda4646ffd84545ffd64545ffd54545ffd34444ffd14444ffcf4343ffce4343ffcc4242ffca4242ffc84242ffc74141ffc54141ffc34040ffc14040ffc04040ffbe3f3fffbc3f3fffba3e3effb93e3effb73e3effb53d3dffb33d3dffb23c3cffb03c3cffae3b3bffac3b3bffab3b3bffa93a3affa73a3affa53939ffa43939ffa23939ffa03838ff9e3838ff9d3737ff9b3737ff993636ff973636ff963636ff943535ff923535ff903434ff8f3434ff8d3434ff8b3333ff893333ff883232ff863232ff843232ff823131ff813131ff7f3030ff7d3030ff7b2f2fff7a2f2fff782f2fff762e2eff742e2eff732d2dff712d2dff6f2d2dff6d2c2cff6c2c2cff6a2b2bff682b2bff662a2aff652a2aff632a2aff612929ff5f2929ff5e2828ff5c2828ff5a2828ff592727ff572727ff552626ff532626ff522626ff502525ff4e2525ff4c2424ff4b2424ff492323ff472323ff452323ff442222ff422222ff402121ff3e2121ff3d2121ff3b2020ff392020ff371f1fff361f1fff341f1fff321e1eff301e1eff2f1d1dff2d1d1dff2b1c1cff291c1cff281c1cff261b1bffff4f4fffff4f4fffff4f4fffff4f4fffff4e4effff4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffa4e4efffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfff94d4dfff94d4dfff94d4dfff84d4dfff54c4cfff14b4bffee4a4affea4a4affe74949ffe34848ffe04747ffdc4646ffd94545ffd54545ffd24444ffce4343ffcb4242ffc74141ffc44040ffc04040ffbd3f3fffb93e3effb63d3dffb23c3cffaf3b3bffab3b3bffa83a3affa43939ffa13838ff9d3737ff9a3636ff963636ff933535ff8f3434ff8c3333ff883232ff853232ff813131ff7e3030ff7a2f2fff772e2eff732d2dff702d2dff6c2c2cff692b2bff652a2aff622929ff5e2828ff5b2828ff582727ff542626ff512525ff4d2424ff4a2323ff462323ff432222ff3f2121ff3c2020ff381f1fff351f1fff311e1eff2e1d1dff2a1c1cff271b1bffff4f4fffff4f4fffff4e4efffe4e4efffe4e4efffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffb4e4efffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfffa4d4dfff94d4dfff84d4dfff34b4bffec4a4affe54848ffde4646ffd74545ffd04343ffc94141ffc24040ffbb3e3effb43c3cffad3b3bffa63939ff9f3737ff983636ff913434ff8a3232ff833131ff7c2f2fff752d2dff6e2c2cff672a2aff602828ff592727ff522525ff4b2323ff442222ff3d2020ff361f1fff2f1d1dff281b1bffff4f4ffffe4e4efffe4e4efffe4e4efffd4e4efffd4e4efffd4e4efffc4e4efffc4e4efffc4e4efffb4e4efffb4e4efffb4e4efffa4d4dfffa4d4dfffa4d4dfff84d4dffef4a4affe14747ffd34444ffc54040ffb73d3dffa93a3aff9b3636ff8d3333ff7f3030ff712c2cff632929ff552626ff472222ff391f1fff2b1c1cfffe4e4efffe4e4efffd4e4efffc4e4efffc4e4efffb4e4efffa4d4dfffa4d4dfff34b4bffda4545ffbe3e3effa23838ff863131ff6a2a2aff4e2424ff321d1dfffe4e4efffc4e4efffb4e4efffa4d4dffe64848ffb03b3bff782d2dff402020fffd4e4efffa4d4dffcb4141ff5c2626fffb4d4dff933333ffc74040ff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &1985201195
 GameObject:
   m_ObjectHideFlags: 0

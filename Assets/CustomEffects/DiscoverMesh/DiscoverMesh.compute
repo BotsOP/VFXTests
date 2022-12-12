@@ -208,8 +208,7 @@ bool CheckAdjacentTrianglesAllChecked(int adjacentTrianlge)
 void CheckAdjacentTriangleShouldDiscover(int triangleIndex, int adjacentTrianlge)
 {
     int adjacentTriangleAbs = abs(adjacentTrianlge);
-    if((true) &&
-    (!reverseDirection && gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited >= 0 || reverseDirection && gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited < 0))
+    if(!reverseDirection && gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited >= 0 || reverseDirection && gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited < 0)
     {
         int value;
         
@@ -224,11 +223,9 @@ void CheckAdjacentTriangleShouldDiscover(int triangleIndex, int adjacentTrianlge
             {
                 if(reverseDirection)
                 {
-                    gpuAdjacentTriangle[triangleIndex].tri1TriangleIndex = -adjacentTrianlge;
                     InterlockedExchange(gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited, 1, value);
                     return;
                 }
-                gpuAdjacentTriangle[triangleIndex].tri1TriangleIndex = -adjacentTrianlge;
                 InterlockedExchange(gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited, -1, value);
                 return;
             }

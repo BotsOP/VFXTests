@@ -11,6 +11,8 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     [SerializeField] private ComputeShader discoverMeshShader;
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private int speed;
+    [SerializeField] private int reverseTime = 30;
+    [SerializeField] private int beforeReverseWait = 20;
     [SerializeField] [Range(0.01f, 0.1f)] private float decaySpeed;
     [SerializeField] private bool start;
     [SerializeField] private float distThreshold;
@@ -18,6 +20,7 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     [SerializeField] private bool reverseDirection;
     [SerializeField] private bool test;
     [SerializeField] private bool debug;
+    [SerializeField] private bool decay;
     public int[] whichTriangleToColor;
     
     private GraphicsBuffer gpuVertices;
@@ -39,10 +42,10 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     private int threadGroupSize;
     private int checkedIndicesCache;
     private bool doneDiscover;
+    private int counter;
     private int[] whichTrianglesToCheck;
     private int[] emptyArray;
     private AdjacentTriangles[] adjacentTrianglesArray;
-    [SerializeField] private bool decay;
 
     private int amountTriangles => targetMesh.triangles.Length / 3;
     private int amountEffectsRunning => gpuAdjacentTriangleList.Count;
@@ -127,14 +130,8 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
 
     public void FirstTriangleToCheck(int triangleToStart)
     {
-        // gpuVertices ??= targetMesh.GetVertexBuffer(0);
-        // gpuIndices ??= targetMesh.GetIndexBuffer();
-        // kernelID = discoverMeshShader.FindKernel("ColorOneTriangle");
-        // discoverMeshShader.SetBuffer(kernelID,"gpuVertices", gpuVertices);
-        // discoverMeshShader.SetBuffer(kernelID,"gpuIndices", gpuIndices);
-        // discoverMeshShader.SetInt("triangleIndexToColor", triangleToStart);
-        // discoverMeshShader.Dispatch(kernelID, 1, 1, 1);
-
+        counter = 0;
+        
         ComputeBuffer adjacentTriangles = new ComputeBuffer(amountTriangles, sizeof(int) * 4, ComputeBufferType.Structured);
         adjacentTriangles.SetData(adjacentTrianglesArray);
         gpuAdjacentTriangleList.Add(adjacentTriangles);
@@ -199,6 +196,7 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
                 
                     if (amountTrianglesToCheckList[j] == 0)
                     {
+                        reverseDirection = false;
                         gpuAdjacentTriangleList[j]?.Release();
                         gpuAdjacentTriangleList.RemoveAt(j);
                         gpuTrianglesShouldCheckAppendList[j]?.Release();
@@ -206,12 +204,10 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
                         amountTrianglesToCheckList.RemoveAt(j);
                     }
                 }
-                
             }
         }
-        
     }
-    
+
     public void DecayMesh()
     {
         kernelID = discoverMeshShader.FindKernel("UpdateMesh");
@@ -323,15 +319,34 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
 
     private void FixedUpdate()
     {
-        if (start)
+        counter++;
+
+        if (counter > reverseTime && gpuAdjacentTriangleList.Count > 0)
         {
-            IncrementTriangles();
+            if (counter > reverseTime + beforeReverseWait)
+            {
+                reverseDirection = true;
+                speed = 4;
+                decaySpeed = 0.5f;
+                IncrementTriangles();
+                DecayMesh();
+                return;
+            }
+            
             DecayMesh();
+            return;
         }
-        if (decay)
-        {
-            DecayMesh();
-        }
+        IncrementTriangles();
+        DecayMesh();
+        
+        // if (start)
+        // {
+        //     IncrementTriangles();
+        // }
+        // if (decay)
+        // {
+        //     DecayMesh();
+        // }
     }
 }
 

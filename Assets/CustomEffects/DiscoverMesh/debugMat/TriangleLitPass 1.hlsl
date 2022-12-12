@@ -266,7 +266,7 @@ void geom(triangle Varyings IN[3], inout TriangleStream<g2f> triStream) {
         o.displacement = IN[i].displacement;
         o.positionCS = IN[i].positionCS;
         o.vertexSH = IN[i].vertexSH;
-        o.uv = float2(IN[0].uv.x, uvy);
+        o.uv = float2(uvx, uvy);
         o.normalWS = IN[i].normalWS;
         o.viewDirWS = IN[i].viewDirWS;
     
@@ -326,7 +326,8 @@ half4 LitPassFragment(g2f input) : SV_Target
     float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
     float uvx = saturate(input.uv.x);
     surfaceData.albedo = uvx;
-    surfaceData.albedo = float3(alpha * input.uv.x, alpha * 0.1, 0);
+    surfaceData.albedo = float3(0, 1, 0.5);
+    surfaceData.albedo = float3((alpha * input.uv.x) * 10, 0, (alpha * input.uv.x) * 10);
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
