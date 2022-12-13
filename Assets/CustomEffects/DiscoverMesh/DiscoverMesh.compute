@@ -19,7 +19,6 @@ struct AdjacentTriangles
     int tri1TriangleIndex;
     int tri2TriangleIndex;
     int tri3TriangleIndex;
-    int hasTriangleBeenVisited;
 };
 struct TriangleInProximity
 {
@@ -30,6 +29,7 @@ struct TriangleInProximity
 RWStructuredBuffer<Vertex> gpuVertices;
 StructuredBuffer<int> gpuIndices;
 RWStructuredBuffer<AdjacentTriangles> gpuAdjacentTriangle;
+RWStructuredBuffer<int> gpuAdjacentTrianglesIndex;
 StructuredBuffer<int> gpuTrianglesShouldCheck;
 AppendStructuredBuffer<int> gpuTrianglesShouldCheckAppend;
 RWStructuredBuffer<int> gpuAmountTrianglesToCheck;
@@ -48,16 +48,6 @@ int triangleIndexToColor;
 float decaySpeed;
 bool reverseDirection;
 float3 hitPos;
-
-bool EqualVector3(float3 a, float3 b)
-{
-    float dist = distance(a, b);
-    if(dist < 0.5)
-    {
-        return true;
-    }
-    return false;
-}
 
 bool EqualVector3(float3 a[3], float3 b)
 {
@@ -148,35 +138,6 @@ void FindAdjacentTriangles (uint3 id : SV_DispatchThreadID)
     gpuAdjacentTriangle[id.x].tri1TriangleIndex = adjacentTrianglesFound[0];
     gpuAdjacentTriangle[id.x].tri2TriangleIndex = adjacentTrianglesFound[1];
     gpuAdjacentTriangle[id.x].tri3TriangleIndex = adjacentTrianglesFound[2];
-    gpuAdjacentTriangle[id.x].hasTriangleBeenVisited = 0;
-}
-
-void RemoveConnectingTriangleAdjaceny(int indexTriangleToCheck, int adjacentTrianlge1, int adjacentTrianlge2, int adjacentTrianlge3)
-{
-    int value;
-    indexTriangleToCheck = abs(indexTriangleToCheck);
-    if(gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge1].tri1TriangleIndex, value);
-    if(gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge1].tri2TriangleIndex, value);
-    if(gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge1].tri3TriangleIndex, value);
-
-
-    if(gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge2].tri1TriangleIndex, value);
-    if(gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge2].tri2TriangleIndex, value);
-    if(gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge2].tri3TriangleIndex, value);
-
-
-    if(gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge3].tri1TriangleIndex, value);
-    if(gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge3].tri2TriangleIndex, value);
-    if(gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex == indexTriangleToCheck)
-        InterlockedExchange(gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex, -gpuAdjacentTriangle[adjacentTrianlge3].tri3TriangleIndex, value);
 }
 
 bool CheckAdjacentTrianglesAllChecked(int adjacentTrianlge)
@@ -205,10 +166,10 @@ bool CheckAdjacentTrianglesAllChecked(int adjacentTrianlge)
     return false;
 }
 
-void CheckAdjacentTriangleShouldDiscover(int triangleIndex, int adjacentTrianlge)
+void CheckAdjacentTriangleShouldDiscover(int adjacentTrianlge)
 {
     int adjacentTriangleAbs = abs(adjacentTrianlge);
-    if(!reverseDirection && gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited >= 0 || reverseDirection && gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited < 0)
+    if(!reverseDirection && gpuAdjacentTrianglesIndex[adjacentTriangleAbs] >= 0 || reverseDirection && gpuAdjacentTrianglesIndex[adjacentTriangleAbs] < 0)
     {
         int value;
         
@@ -223,10 +184,10 @@ void CheckAdjacentTriangleShouldDiscover(int triangleIndex, int adjacentTrianlge
             {
                 if(reverseDirection)
                 {
-                    InterlockedExchange(gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited, 1, value);
+                    InterlockedExchange(gpuAdjacentTrianglesIndex[adjacentTriangleAbs], 1, value);
                     return;
                 }
-                InterlockedExchange(gpuAdjacentTriangle[adjacentTriangleAbs].hasTriangleBeenVisited, -1, value);
+                InterlockedExchange(gpuAdjacentTrianglesIndex[adjacentTriangleAbs], -1, value);
                 return;
             }
         }
@@ -255,20 +216,20 @@ void DiscoverMesh (uint3 id : SV_DispatchThreadID)
     int value;
     if(reverseDirection)
     {
-        gpuAdjacentTriangle[triangleIndex].hasTriangleBeenVisited = 1;
+        gpuAdjacentTrianglesIndex[triangleIndex] = 1;
     }
     else
     {
-        gpuAdjacentTriangle[triangleIndex].hasTriangleBeenVisited = -1;
+        gpuAdjacentTrianglesIndex[triangleIndex] = -1;
     }
     
-    gpuVertices[index1].uvx = 2;
-    gpuVertices[index2].uvx = 2;
-    gpuVertices[index3].uvx = 2;
+    gpuVertices[index1].uvx = 1.8;
+    gpuVertices[index2].uvx = 1.8;
+    gpuVertices[index3].uvx = 1.8;
     
-    CheckAdjacentTriangleShouldDiscover(triangleIndex, adjacentTrianlge1);
-    CheckAdjacentTriangleShouldDiscover(triangleIndex, adjacentTrianlge2);
-    CheckAdjacentTriangleShouldDiscover(triangleIndex, adjacentTrianlge3);
+    CheckAdjacentTriangleShouldDiscover(adjacentTrianlge1);
+    CheckAdjacentTriangleShouldDiscover(adjacentTrianlge2);
+    CheckAdjacentTriangleShouldDiscover(adjacentTrianlge3);
 }
 
 [numthreads(128,1,1)]
