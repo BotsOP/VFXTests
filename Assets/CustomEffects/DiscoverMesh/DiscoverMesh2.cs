@@ -11,8 +11,9 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     [SerializeField] private ComputeShader discoverMeshShader;
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private int speed;
-    [SerializeField] private int reverseTime = 30;
-    [SerializeField] private int beforeReverseWait = 20;
+    [SerializeField] private int speedWhenReverse;
+    [SerializeField] private float timeUntilReverse = 30;
+    [SerializeField] private float timeDecayBeforeReverse = 20;
     [SerializeField] [Range(0.01f, 0.1f)] private float decaySpeed;
     [SerializeField] private bool start;
     [SerializeField] private float distThreshold;
@@ -32,6 +33,10 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     private List<ComputeBuffer> gpuAdjacentTrianglesIndexList;
     private List<ComputeBuffer> gpuTrianglesShouldCheckAppendList;
     private List<int> amountTrianglesToCheckList;
+    private List<bool> reverseDirectionList;
+    private List<float> timeUntilReverseList;
+    private List<float> timeToDecayUntilReverseList;
+    private List<float> startTimeList;
 
     private ComputeBuffer gpuAmountTrianglesInProximity;
     private ComputeBuffer gpuTrianglesInProximity;
@@ -72,6 +77,10 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         amountTrianglesToCheckList = new List<int>();
         gpuAdjacentTrianglesIndexList = new List<ComputeBuffer>();
         gpuTrianglesShouldCheckAppendList = new List<ComputeBuffer>();
+        reverseDirectionList = new List<bool>();
+        timeUntilReverseList = new List<float>();
+        timeToDecayUntilReverseList = new List<float>();
+        startTimeList = new List<float>();
         
         targetMesh = meshFilter.sharedMesh;
         targetMesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
@@ -143,6 +152,11 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         whichTrianglesToCheck[0] = triangleToStart;
         gpuTrianglesShouldCheckAppendList[amountEffectsRunning - 1].SetData(whichTrianglesToCheck);
         amountTrianglesToCheckList.Add(1);
+        
+        reverseDirectionList.Add(reverseDirection);
+        timeUntilReverseList.Add(timeUntilReverse);
+        timeToDecayUntilReverseList.Add(timeDecayBeforeReverse);
+        startTimeList.Add(Time.time);
     }
 
     public void IncrementTriangles()
@@ -150,65 +164,88 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         gpuVertices ??= targetMesh.GetVertexBuffer(0);
         gpuIndices ??= targetMesh.GetIndexBuffer();
         gpuAmountTrianglesToCheck.SetData(emptyArray);
-
-        for (int i = 0; i < speed; i++)
+        
+        for (int i = 0; i < amountEffectsRunning; i++)
         {
-            for (int j = 0; j < amountEffectsRunning; j++)
+            IncrementTriangle(i);
+        }
+    }
+
+    private void IncrementTriangle(int i)
+    {
+        bool shouldReverseDirection = false;
+        int incrementSpeed = speed;
+        if (reverseDirectionList[i] && Time.time > startTimeList[i] + timeUntilReverseList[i])
+        {
+            if (Time.time > startTimeList[i] + timeToDecayUntilReverseList[i] + timeUntilReverseList[i])
             {
-                AdjacentTriangles[] adjacentTriangles = new AdjacentTriangles[amountTriangles];
-                gpuAdjacentTriangle.GetData(adjacentTriangles);
-
-                int[] triangleIndex = new int[amountTriangles];
-                gpuAdjacentTrianglesIndexList[j].GetData(triangleIndex);
-
-                int[] shouldCheck = new int[amountTriangles / 3];
-                gpuTrianglesShouldCheckAppendList[j].GetData(shouldCheck);
-                
-
-                gpuTrianglesShouldCheck?.Release();
-                gpuTrianglesShouldCheck = new ComputeBuffer(amountTrianglesToCheckList[j], sizeof(int), ComputeBufferType.Structured);
-            
-                whichTrianglesToCheck = new int[amountTrianglesToCheckList[j]];
-                gpuTrianglesShouldCheckAppendList[j].GetData(whichTrianglesToCheck);
-                whichTrianglesToCheck = whichTrianglesToCheck.Distinct().ToArray();
-                amountTrianglesToCheckList[j] = whichTrianglesToCheck.Length;
-                discoverMeshShader.SetInt("amountTrianglesToCheck", amountTrianglesToCheckList[j]);
-                gpuTrianglesShouldCheck.SetData(whichTrianglesToCheck);
-
-                kernelID = discoverMeshShader.FindKernel("DiscoverMesh");
-                discoverMeshShader.GetKernelThreadGroupSizes(kernelID, out uint threadGroupSizeX, out _, out _);
-                threadGroupSize = Mathf.CeilToInt(amountTrianglesToCheckList[j] / (float)threadGroupSizeX);
-
-                gpuTrianglesShouldCheckAppendList[j].SetCounterValue(0);
-                discoverMeshShader.SetBuffer(kernelID,"gpuVertices", gpuVertices);
-                discoverMeshShader.SetBuffer(kernelID,"gpuIndices", gpuIndices);
-                discoverMeshShader.SetBuffer(kernelID,"gpuTrianglesShouldCheck", gpuTrianglesShouldCheck);
-                discoverMeshShader.SetBuffer(kernelID,"gpuTrianglesShouldCheckAppend", gpuTrianglesShouldCheckAppendList[j]);
-                discoverMeshShader.SetBuffer(kernelID,"gpuAmountTrianglesToCheck", gpuAmountTrianglesToCheck);
-                discoverMeshShader.SetBuffer(kernelID,"gpuAdjacentTriangle", gpuAdjacentTriangle);
-                discoverMeshShader.SetBuffer(kernelID,"gpuAdjacentTrianglesIndex", gpuAdjacentTrianglesIndexList[j]);
-                discoverMeshShader.SetInt("amountTriangles", amountTriangles);
-                discoverMeshShader.SetInt("amountTrianglesToCheck", amountTrianglesToCheckList[j]);
-                discoverMeshShader.SetBool("reverseDirection", reverseDirection);
-                discoverMeshShader.Dispatch(kernelID, threadGroupSize, 1, 1);
-
-
-                int[] amountTrianglesToCheckArray = new int[1];
-                gpuAmountTrianglesToCheck.GetData(amountTrianglesToCheckArray);
-                gpuAmountTrianglesToCheck.SetData(emptyArray);
-                amountTrianglesToCheckList[j] = amountTrianglesToCheckArray[0];
-            
-                if (amountTrianglesToCheckList[j] == 0)
-                {
-                    reverseDirection = false;
-                    gpuAdjacentTrianglesIndexList[j]?.Release();
-                    gpuAdjacentTrianglesIndexList.RemoveAt(j);
-                    gpuTrianglesShouldCheckAppendList[j]?.Release();
-                    gpuTrianglesShouldCheckAppendList.RemoveAt(j);
-                    amountTrianglesToCheckList.RemoveAt(j);
-                }
+                incrementSpeed = speedWhenReverse;
+                shouldReverseDirection = true;
+            }
+            else
+            {
+                return;
             }
         }
+        for (int j = 0; j < incrementSpeed; j++)
+        {
+            gpuTrianglesShouldCheck?.Release();
+            gpuTrianglesShouldCheck = new ComputeBuffer(amountTrianglesToCheckList[i], sizeof(int), ComputeBufferType.Structured);
+
+            whichTrianglesToCheck = new int[amountTrianglesToCheckList[i]];
+            gpuTrianglesShouldCheckAppendList[i].GetData(whichTrianglesToCheck);
+            whichTrianglesToCheck = whichTrianglesToCheck.Distinct().ToArray();
+            amountTrianglesToCheckList[i] = whichTrianglesToCheck.Length;
+            discoverMeshShader.SetInt("amountTrianglesToCheck", amountTrianglesToCheckList[i]);
+            gpuTrianglesShouldCheck.SetData(whichTrianglesToCheck);
+
+            kernelID = discoverMeshShader.FindKernel("DiscoverMesh");
+            discoverMeshShader.GetKernelThreadGroupSizes(kernelID, out uint threadGroupSizeX, out _, out _);
+            threadGroupSize = Mathf.CeilToInt(amountTrianglesToCheckList[i] / (float)threadGroupSizeX);
+
+            //const
+            discoverMeshShader.SetBuffer(kernelID, "gpuVertices", gpuVertices);
+            discoverMeshShader.SetBuffer(kernelID, "gpuIndices", gpuIndices);
+            discoverMeshShader.SetBuffer(kernelID, "gpuAdjacentTriangle", gpuAdjacentTriangle);
+            discoverMeshShader.SetInt("amountTriangles", amountTriangles);
+            //changes
+            discoverMeshShader.SetBuffer(kernelID, "gpuTrianglesShouldCheck", gpuTrianglesShouldCheck);
+            discoverMeshShader.SetBuffer(kernelID, "gpuTrianglesShouldCheckAppend", gpuTrianglesShouldCheckAppendList[i]);
+            discoverMeshShader.SetBuffer(kernelID, "gpuAmountTrianglesToCheck", gpuAmountTrianglesToCheck);
+            discoverMeshShader.SetBuffer(kernelID, "gpuAdjacentTrianglesIndex", gpuAdjacentTrianglesIndexList[i]);
+            discoverMeshShader.SetInt("amountTrianglesToCheck", amountTrianglesToCheckList[i]);
+            discoverMeshShader.SetBool("reverseDirection", shouldReverseDirection);
+            gpuTrianglesShouldCheckAppendList[i].SetCounterValue(0);
+            discoverMeshShader.Dispatch(kernelID, threadGroupSize, 1, 1);
+
+            int[] amountTrianglesToCheckArray = new int[1];
+            gpuAmountTrianglesToCheck.GetData(amountTrianglesToCheckArray);
+            amountTrianglesToCheckList[i] = amountTrianglesToCheckArray[0];
+            gpuAmountTrianglesToCheck.SetData(emptyArray);
+
+            if (amountTrianglesToCheckList[i] == 0)
+            {
+                gpuAdjacentTrianglesIndexList[i]?.Release();
+                gpuAdjacentTrianglesIndexList.RemoveAt(i);
+                gpuTrianglesShouldCheckAppendList[i]?.Release();
+                gpuTrianglesShouldCheckAppendList.RemoveAt(i);
+                amountTrianglesToCheckList.RemoveAt(i);
+                reverseDirectionList.RemoveAt(i);
+                timeUntilReverseList.RemoveAt(i);
+                timeToDecayUntilReverseList.RemoveAt(i);
+                startTimeList.RemoveAt(i);
+                return;
+            }
+        }
+    }
+
+    private bool ShouldReverse(int i)
+    {
+        if (reverseDirectionList[i])
+        {
+            
+        }
+        return false;
     }
 
     public void DecayMesh()
@@ -217,9 +254,11 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
         discoverMeshShader.GetKernelThreadGroupSizes(kernelID, out uint threadGroupSizeX, out _, out _);
         threadGroupSize = Mathf.CeilToInt(targetMesh.vertexCount / (float)threadGroupSizeX);
 
+        //const
         discoverMeshShader.SetBuffer(kernelID, "gpuVertices", gpuVertices);
         discoverMeshShader.SetBuffer(kernelID, "gpuIndices", gpuIndices);
         discoverMeshShader.SetInt("amountVerts", targetMesh.vertexCount);
+        //changes
         discoverMeshShader.SetFloat("decaySpeed", decaySpeed);
 
         discoverMeshShader.Dispatch(kernelID, threadGroupSize, 1, 1);
