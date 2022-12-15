@@ -1,44 +1,58 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class Bosmo : MonoBehaviour, IHittable
+namespace Bosmo
 {
-    [SerializeField] private MeshFilter meshFilter;
-    [SerializeField] private bool reverseDirection;
-    private DiscoverEffect discoverMesh;
-    private GetTriangle closestTriangle;
+    public class Bosmo : MonoBehaviour, IHittable
+    {
+        [SerializeField] private MeshFilter meshFilter;
+        [SerializeField] private bool reverseDirection;
+        [SerializeField] private bool debug;
+        [SerializeField] private bool run;
+        private DiscoverEffect discoverMesh;
+        private GetTriangle closestTriangle;
+        private SeparateTriangleHeight triangleHeight;
 
-    private Mesh mesh;
+        private Mesh mesh;
     
-    void Awake()
-    {
-        mesh = meshFilter.sharedMesh;
-        mesh = MeshExtensions.CopyMesh(mesh);
-        meshFilter.sharedMesh = mesh;
+        void Awake()
+        {
+            mesh = meshFilter.sharedMesh;
+            mesh = MeshExtensions.CopyMesh(mesh);
+            meshFilter.sharedMesh = mesh;
 
-        mesh.uv4 = new Vector2[mesh.vertexCount];
+            mesh.uv4 = new Vector2[mesh.vertexCount];
         
-        mesh.vertexBufferTarget |= GraphicsBuffer.Target.Structured;
-        mesh.indexBufferTarget |= GraphicsBuffer.Target.Structured;
+            mesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+            mesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
+            mesh.indexFormat = IndexFormat.UInt32;
 
-        MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 2, 0));
-        MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1));
+            MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 2, 0));
+            MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1));
         
-        discoverMesh = new DiscoverEffect(mesh);
-        discoverMesh.DiscoverAllAdjacentTriangle();
-        closestTriangle = new GetTriangle(mesh, meshFilter.transform);
-    }
+            discoverMesh = new DiscoverEffect(mesh);
+            discoverMesh.DiscoverAllAdjacentTriangle();
+            closestTriangle = new GetTriangle(mesh, meshFilter.transform);
+            triangleHeight = new SeparateTriangleHeight(mesh);
+        }
 
-    void FixedUpdate()
-    {
-        discoverMesh.IncrementTriangles();
-        discoverMesh.DecayMesh();
-    }
-    public void Hit(Vector3 hitPos)
-    {
-        int closestTriangleID = closestTriangle.GetClosestTriangle(hitPos);
-        discoverMesh.FirstTriangleToCheck(closestTriangleID, reverseDirection);
+        void FixedUpdate()
+        {
+            if (Input.GetKeyDown(KeyCode.F) || run)
+            {
+                discoverMesh.IncrementTriangles();
+                discoverMesh.DecayMesh();
+                triangleHeight.UpdateTriangles();
+            }
+            
+        }
+        public void Hit(Vector3 hitPos)
+        {
+            int closestTriangleID = closestTriangle.GetClosestTriangle(hitPos);
+            if (!debug)
+            {
+                discoverMesh.FirstTriangleToCheck(closestTriangleID, reverseDirection);
+            }
+        }
     }
 }

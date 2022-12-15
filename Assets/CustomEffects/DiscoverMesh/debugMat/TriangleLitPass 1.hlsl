@@ -327,7 +327,7 @@ half4 LitPassFragment(g2f input) : SV_Target
     float uvx = saturate(input.uv.x);
     surfaceData.albedo = uvx;
     //surfaceData.albedo = float3(0, 1, 0.5);
-    //surfaceData.albedo = float3((alpha * input.uv.x) * 10, 0, (alpha * input.uv.x) * 10);
+    surfaceData.albedo = float3((alpha * input.uv.x) * 10, alpha * 0.1, 0);
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);

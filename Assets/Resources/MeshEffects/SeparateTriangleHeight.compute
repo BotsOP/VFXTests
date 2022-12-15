@@ -1,0 +1,44 @@
+#pragma kernel SeperateTriangleHeight
+
+RWByteAddressBuffer gpuVertices;
+ByteAddressBuffer gpuIndices;
+StructuredBuffer<float3> gpuOldVertices;
+int amountTriangles;
+
+[numthreads(128,1,1)]
+void SeperateTriangleHeight (uint3 id : SV_DispatchThreadID)
+{
+	if(id.x > (uint)amountTriangles)
+	{
+		return;
+	}
+	
+	uint index1 = gpuIndices.Load((id.x * 3) * 4);
+	uint index2 = gpuIndices.Load((id.x * 3 + 1) * 4);
+	uint index3 = gpuIndices.Load((id.x * 3 + 2) * 4);
+
+	float uvx1 = asfloat(gpuVertices.Load2(index1 * 48 + 40)).x;
+	float uvx2 = asfloat(gpuVertices.Load2(index2 * 48 + 40)).x;
+	float uvx3 = asfloat(gpuVertices.Load2(index3 * 48 + 40)).x;
+	float uvAvg = (uvx1 + uvx2 + uvx3) / 3;
+
+	if(uvAvg > 0)
+	{
+		float3 pos1 = gpuOldVertices[index1];
+		float3 pos2 = gpuOldVertices[index2];
+		float3 pos3 = gpuOldVertices[index3];
+
+		float3 nor1 = asfloat(gpuVertices.Load3(index1 * 48 + 12));
+		float3 nor2 = asfloat(gpuVertices.Load3(index2 * 48 + 12));
+		float3 nor3 = asfloat(gpuVertices.Load3(index3 * 48 + 12));
+		float3 norAvg = (nor1 + nor2 + nor3) / 3;
+
+		pos1 += norAvg * uvAvg * 0.001;
+		pos2 += norAvg * uvAvg * 0.001;
+		pos3 += norAvg * uvAvg * 0.001;
+
+		gpuVertices.Store3(index1 * 48, asuint(pos1));
+		gpuVertices.Store3(index2 * 48, asuint(pos2));
+		gpuVertices.Store3(index3 * 48, asuint(pos3));
+	}
+}
