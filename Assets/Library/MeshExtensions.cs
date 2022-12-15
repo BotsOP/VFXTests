@@ -8,7 +8,7 @@ public static class MeshExtensions
     public static Mesh CopyMesh(Mesh mesh)
     {
         Mesh newMesh = new Mesh();
-        newMesh.name = "copied " + mesh.name;
+        newMesh.name = "copy of " + mesh.name;
 
         newMesh.indexFormat = mesh.indexFormat;
         newMesh.vertices = mesh.vertices;
@@ -39,9 +39,9 @@ public static class MeshExtensions
     }
 
     #region EditVertexAttribute
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, int dimension)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, int dimension)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -49,7 +49,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     meshAttrib[i].dimension = dimension;
                 }
@@ -60,9 +60,9 @@ public static class MeshExtensions
             Debug.LogError($"Mesh: {mesh.name} doesnt have vertex attribute {attrib} but you are trying to edit it");
         }
     }
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, int dimension, VertexAttributeFormat format)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, int dimension, VertexAttributeFormat format)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -70,7 +70,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     meshAttrib[i].dimension = dimension;
                     meshAttrib[i].format = format;
@@ -82,9 +82,9 @@ public static class MeshExtensions
             Debug.LogError($"Mesh: {mesh.name} doesnt have vertex attribute {attrib} but you are trying to edit it");
         }
     }
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, int dimension, VertexAttributeFormat format, uint stream)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, int dimension, VertexAttributeFormat format, uint stream)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -92,7 +92,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     meshAttrib[i].dimension = dimension;
                     meshAttrib[i].format = format;
@@ -105,9 +105,9 @@ public static class MeshExtensions
             Debug.LogError($"Mesh: {mesh.name} doesnt have vertex attribute {attrib} but you are trying to edit it");
         }
     }
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, int dimension, uint stream)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, int dimension, uint stream)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -115,7 +115,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     meshAttrib[i].dimension = dimension;
                     meshAttrib[i].stream = (int)stream;
@@ -127,9 +127,9 @@ public static class MeshExtensions
             Debug.LogError($"Mesh: {mesh.name} doesnt have vertex attribute {attrib} but you are trying to edit it");
         }
     }
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, VertexAttributeFormat format)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, VertexAttributeFormat format)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -137,7 +137,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     meshAttrib[i].format = format;
                 }
@@ -148,9 +148,9 @@ public static class MeshExtensions
             Debug.LogError($"Mesh: {mesh.name} doesnt have vertex attribute {attrib} but you are trying to edit it");
         }
     }
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, uint stream)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, uint stream)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -158,7 +158,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
 
                     meshAttrib[i].stream = (int)stream;
@@ -170,9 +170,9 @@ public static class MeshExtensions
             Debug.LogError($"Mesh: {mesh.name} doesnt have vertex attribute {attrib} but you are trying to edit it");
         }
     }
-    public static void EditVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib, VertexAttributeFormat format, uint stream)
+    public static void EditVertexAttribute(Mesh mesh, VertexAttribute attrib, VertexAttributeFormat format, uint stream)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -180,7 +180,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     meshAttrib[i].format = format;
                     meshAttrib[i].stream = (int)stream;
@@ -194,9 +194,9 @@ public static class MeshExtensions
     }
     #endregion
 
-    public static VertexAttributeDescriptor GetVertexAttribute(Mesh mesh, VertexAttributeDescriptor attrib)
+    public static VertexAttributeDescriptor GetVertexAttribute(Mesh mesh, VertexAttribute attrib)
     {
-        if (mesh.HasVertexAttribute(attrib.attribute))
+        if (mesh.HasVertexAttribute(attrib))
         {
             int vertexAttribCount = GetVertexAttribCount(mesh);
             VertexAttributeDescriptor[] meshAttrib = new VertexAttributeDescriptor[vertexAttribCount];
@@ -204,7 +204,7 @@ public static class MeshExtensions
 
             for (int i = 0; i < vertexAttribCount; i++)
             {
-                if (meshAttrib[i] == attrib)
+                if (meshAttrib[i].attribute == attrib)
                 {
                     return meshAttrib[i];
                 }
