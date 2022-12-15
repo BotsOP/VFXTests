@@ -1,0 +1,240 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel FindAdjacentTriangles
+#pragma kernel DiscoverMesh
+#pragma kernel DecayMesh
+
+struct Vertex
+{
+    float3 pos;
+    float3 nor;
+    float4 tang;
+    float uvx;
+    float uvy;
+};
+
+struct AdjacentTriangles
+{
+    int tri1TriangleIndex;
+    int tri2TriangleIndex;
+    int tri3TriangleIndex;
+};
+
+RWStructuredBuffer<Vertex> gpuVertices;
+StructuredBuffer<int> gpuIndices;
+RWStructuredBuffer<AdjacentTriangles> gpuAdjacentTriangle;
+RWStructuredBuffer<int> gpuAdjacentTrianglesIndex;
+StructuredBuffer<int> gpuTrianglesShouldCheck;
+AppendStructuredBuffer<int> gpuTrianglesShouldCheckAppend;
+RWStructuredBuffer<int> gpuAmountTrianglesToCheck;
+
+int amountTriangles;
+int amountTrianglesToCheck;
+int amountTrianglesToColor;
+int amountVerts;
+int triangleIndexToColor;
+float decaySpeed;
+bool reverseDirection;
+
+bool EqualVector3(float3 a[3], float3 b)
+{
+    float minDist = 0.00001;
+    
+    if(abs(a[0].x - b.x) < minDist && abs(a[0].y - b.y) < minDist && abs(a[0].z - b.z) < minDist)
+    {
+        return true;
+    }
+    if(abs(a[1].x - b.x) < minDist && abs(a[1].y - b.y) < minDist && abs(a[1].z - b.z) < minDist)
+    {
+        return true;
+    }
+    if(abs(a[2].x - b.x) < minDist && abs(a[2].y - b.y) < minDist && abs(a[2].z - b.z) < minDist)
+    {
+        return true;
+    }
+    return false;
+}
+
+[numthreads(128,1,1)]
+void FindAdjacentTriangles (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > (uint)amountTriangles)
+    {
+        return;
+    }
+    uint index1 = gpuIndices[id.x * 3];
+    uint index2 = gpuIndices[id.x * 3 + 1];
+    uint index3 = gpuIndices[id.x * 3 + 2];
+    
+    float3 vertex1 = gpuVertices[index1].pos;
+    float3 vertex2 = gpuVertices[index2].pos;
+    float3 vertex3 = gpuVertices[index3].pos;
+    
+    float3 allPos[3];
+    allPos[0] = vertex1;
+    allPos[1] = vertex2;
+    allPos[2] = vertex3;
+
+    float3 newVertex1;
+    float3 newVertex2;
+    float3 newVertex3;
+
+    uint newIndex1;
+    uint newIndex2;
+    uint newIndex3;
+
+    int adjacentTrianglesFound[3] = {-1, -1, -1};
+    int amountTrianglesFound = 0;
+
+    for (int i = 0; i < amountTriangles; i++)
+    {
+        newIndex1 = gpuIndices[i * 3];
+        newIndex2 = gpuIndices[i * 3 + 1];
+        newIndex3 = gpuIndices[i * 3 + 2];
+
+        if((uint)i == id.x)
+        {
+            continue;
+        }
+
+        newVertex1 = gpuVertices[newIndex1].pos;
+        newVertex2 = gpuVertices[newIndex2].pos;
+        newVertex3 = gpuVertices[newIndex3].pos;
+        
+        int amountMatchingVertexFound = 0;
+        if(EqualVector3(allPos, newVertex1))
+        {
+            amountMatchingVertexFound++;
+        }
+        if(EqualVector3(allPos, newVertex2))
+        {
+            amountMatchingVertexFound++;
+        }
+        if(EqualVector3(allPos, newVertex3))
+        {
+            amountMatchingVertexFound++;
+        }
+
+        if(amountMatchingVertexFound >= 2)
+        {
+            adjacentTrianglesFound[amountTrianglesFound] = i;
+            amountTrianglesFound++;
+        }
+    }
+
+    gpuAdjacentTriangle[id.x].tri1TriangleIndex = adjacentTrianglesFound[0];
+    gpuAdjacentTriangle[id.x].tri2TriangleIndex = adjacentTrianglesFound[1];
+    gpuAdjacentTriangle[id.x].tri3TriangleIndex = adjacentTrianglesFound[2];
+}
+
+bool CheckAdjacentTrianglesAllChecked(int adjacentTrianlge)
+{
+    float adjacentAdjacent1UVArray[9];
+    int adjacentAdjacentTriangle1 = abs(gpuAdjacentTriangle[adjacentTrianlge].tri1TriangleIndex);
+    int adjacentAdjacentTriangle2 = abs(gpuAdjacentTriangle[adjacentTrianlge].tri2TriangleIndex);
+    int adjacentAdjacentTriangle3 = abs(gpuAdjacentTriangle[adjacentTrianlge].tri3TriangleIndex);
+    adjacentAdjacent1UVArray[0] = gpuVertices[gpuIndices[adjacentAdjacentTriangle1 * 3]].uvx;
+    adjacentAdjacent1UVArray[1] = gpuVertices[gpuIndices[adjacentAdjacentTriangle1 * 3 + 1]].uvx;
+    adjacentAdjacent1UVArray[2] = gpuVertices[gpuIndices[adjacentAdjacentTriangle1 * 3 + 2]].uvx;
+            
+    adjacentAdjacent1UVArray[3] = gpuVertices[gpuIndices[adjacentAdjacentTriangle2 * 3]].uvx;
+    adjacentAdjacent1UVArray[4] = gpuVertices[gpuIndices[adjacentAdjacentTriangle2 * 3 + 1]].uvx;
+    adjacentAdjacent1UVArray[5] = gpuVertices[gpuIndices[adjacentAdjacentTriangle2 * 3 + 2]].uvx;
+
+    adjacentAdjacent1UVArray[6] = gpuVertices[gpuIndices[adjacentAdjacentTriangle3 * 3]].uvx;
+    adjacentAdjacent1UVArray[7] = gpuVertices[gpuIndices[adjacentAdjacentTriangle3 * 3 + 1]].uvx;
+    adjacentAdjacent1UVArray[8] = gpuVertices[gpuIndices[adjacentAdjacentTriangle3 * 3 + 2]].uvx;
+    if(adjacentAdjacent1UVArray[0] >= 1 && adjacentAdjacent1UVArray[1] >= 1 && adjacentAdjacent1UVArray[2] >= 1 &&
+        adjacentAdjacent1UVArray[3] >= 1 && adjacentAdjacent1UVArray[4] >= 1 && adjacentAdjacent1UVArray[5] >= 1 &&
+        adjacentAdjacent1UVArray[6] >= 1 && adjacentAdjacent1UVArray[7] >= 1 && adjacentAdjacent1UVArray[8] >= 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+void CheckAdjacentTriangleShouldDiscover(int adjacentTrianlge)
+{
+    int adjacentTriangleAbs = abs(adjacentTrianlge);
+    if(!reverseDirection && gpuAdjacentTrianglesIndex[adjacentTriangleAbs] >= 0 || reverseDirection && gpuAdjacentTrianglesIndex[adjacentTriangleAbs] < 0)
+    {
+        int value;
+        
+        float adjacentUVArray[3];
+        adjacentUVArray[0] = gpuVertices[gpuIndices[adjacentTriangleAbs * 3]].uvx;
+        adjacentUVArray[1] = gpuVertices[gpuIndices[adjacentTriangleAbs * 3 + 1]].uvx;
+        adjacentUVArray[2] = gpuVertices[gpuIndices[adjacentTriangleAbs * 3 + 2]].uvx;
+        
+        if(adjacentUVArray[0] >= 1 && adjacentUVArray[1] >= 1 && adjacentUVArray[2] >= 1 )
+        {
+            if(CheckAdjacentTrianglesAllChecked(adjacentTrianlge))
+            {
+                if(reverseDirection)
+                {
+                    InterlockedExchange(gpuAdjacentTrianglesIndex[adjacentTriangleAbs], 1, value);
+                    return;
+                }
+                InterlockedExchange(gpuAdjacentTrianglesIndex[adjacentTriangleAbs], -1, value);
+                return;
+            }
+        }
+        gpuTrianglesShouldCheckAppend.Append(adjacentTriangleAbs);
+        InterlockedAdd(gpuAmountTrianglesToCheck[0], 1);
+    }
+}
+
+[numthreads(128,1,1)]
+void DiscoverMesh (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x >= (uint)amountTrianglesToCheck)
+    {
+        return;
+    }
+
+    int triangleIndex = gpuTrianglesShouldCheck[id.x];
+    int index1 = gpuIndices[triangleIndex * 3];
+    int index2 = gpuIndices[triangleIndex * 3 + 1];
+    int index3 = gpuIndices[triangleIndex * 3 + 2];
+
+    int adjacentTrianlge1 = gpuAdjacentTriangle[triangleIndex].tri1TriangleIndex;
+    int adjacentTrianlge2 = gpuAdjacentTriangle[triangleIndex].tri2TriangleIndex;
+    int adjacentTrianlge3 = gpuAdjacentTriangle[triangleIndex].tri3TriangleIndex;
+
+    if(reverseDirection)
+    {
+        gpuAdjacentTrianglesIndex[triangleIndex] = 1;
+    }
+    else
+    {
+        gpuAdjacentTrianglesIndex[triangleIndex] = -1;
+    }
+    
+    gpuVertices[index1].uvx = 1.8;
+    gpuVertices[index2].uvx = 1.8;
+    gpuVertices[index3].uvx = 1.8;
+    
+    CheckAdjacentTriangleShouldDiscover(adjacentTrianlge1);
+    CheckAdjacentTriangleShouldDiscover(adjacentTrianlge2);
+    CheckAdjacentTriangleShouldDiscover(adjacentTrianlge3);
+}
+
+[numthreads(128,1,1)]
+void DecayMesh (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > (uint)amountVerts)
+    {
+        return;
+    }
+    float uvx = gpuVertices[id.x].uvx;
+
+    if(uvx >= 1)
+    {
+        uvx -= 0.1;
+        gpuVertices[id.x].uvx = uvx;
+    }
+    else if(uvx > 0)
+    {
+        uvx -= decaySpeed;
+        uvx = uvx < 0 ? 0 : uvx;
+        gpuVertices[id.x].uvx = uvx;
+    }
+}

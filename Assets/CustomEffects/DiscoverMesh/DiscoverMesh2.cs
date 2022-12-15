@@ -15,13 +15,10 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     [SerializeField] private float timeUntilReverse = 30;
     [SerializeField] private float timeDecayBeforeReverse = 20;
     [SerializeField] [Range(0.01f, 0.1f)] private float decaySpeed;
-    [SerializeField] private bool start;
     [SerializeField] private float distThreshold;
     [SerializeField] private Transform ball;
     [SerializeField] private bool reverseDirection;
-    [SerializeField] private bool test;
     [SerializeField] private bool debug;
-    [SerializeField] private bool decay;
     public int[] whichTriangleToColor;
     
     private GraphicsBuffer gpuVertices;
@@ -47,7 +44,6 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
     private int threadGroupSize;
     private int checkedIndicesCache;
     private bool doneDiscover;
-    private int counter;
     private int[] whichTrianglesToCheck;
     private int[] emptyArray;
     private AdjacentTriangles[] adjacentTrianglesArray;
@@ -139,8 +135,6 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
 
     public void FirstTriangleToCheck(int triangleToStart)
     {
-        counter = 0;
-        
         ComputeBuffer adjacentTrianglesIndex = new ComputeBuffer(amountTriangles, sizeof(int), ComputeBufferType.Structured);
         adjacentTrianglesIndex.SetData(new int[amountTriangles]);
         gpuAdjacentTrianglesIndexList.Add(adjacentTrianglesIndex);
@@ -237,15 +231,6 @@ public class DiscoverMesh2 : MonoBehaviour, IHittable
                 return;
             }
         }
-    }
-
-    private bool ShouldReverse(int i)
-    {
-        if (reverseDirectionList[i])
-        {
-            
-        }
-        return false;
     }
 
     public void DecayMesh()

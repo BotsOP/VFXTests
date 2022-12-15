@@ -1,0 +1,55 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel FindClosestTriangle
+
+struct Vertex
+{
+    float3 pos;
+    float3 nor;
+    float4 tang;
+    float uvx;
+    float uvy;
+};
+
+struct TriangleInProximity
+{
+    uint id;
+    float dist;
+};
+
+RWStructuredBuffer<Vertex> gpuVertices;
+StructuredBuffer<int> gpuIndices;
+
+RWStructuredBuffer<int> gpuAmountTrianglesInProximity;
+AppendStructuredBuffer<TriangleInProximity> gpuTrianglesInProximity;
+
+float distThreshold;
+int amountTriangles;
+float3 hitPos;
+
+[numthreads(128,1,1)]
+void FindClosestTriangle (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > (uint)amountTriangles)
+    {
+        return;
+    }
+    uint index1 = gpuIndices[id.x * 3];
+    uint index2 = gpuIndices[id.x * 3 + 1];
+    uint index3 = gpuIndices[id.x * 3 + 2];
+    
+    float3 vertex1 = gpuVertices[index1].pos;
+    float3 vertex2 = gpuVertices[index2].pos;
+    float3 vertex3 = gpuVertices[index3].pos;
+    
+    float3 avgPos = (vertex1 + vertex2 + vertex3) / 3;
+    float dist = distance(avgPos, hitPos);
+    
+    if(dist < distThreshold)
+    {
+        InterlockedAdd(gpuAmountTrianglesInProximity[0], 1);
+        TriangleInProximity tri;
+        tri.id = id.x;
+        tri.dist = dist;
+        gpuTrianglesInProximity.Append(tri);
+    }
+}
