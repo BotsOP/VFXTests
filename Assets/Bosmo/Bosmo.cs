@@ -12,6 +12,7 @@ namespace Bosmo
         private DiscoverEffect discoverMesh;
         private GetTriangle closestTriangle;
         private SeparateTriangleHeight triangleHeight;
+        private CompositeEffects compositer;
 
         private Mesh mesh;
     
@@ -27,13 +28,17 @@ namespace Bosmo
             mesh.indexBufferTarget |= GraphicsBuffer.Target.Raw;
             mesh.indexFormat = IndexFormat.UInt32;
 
-            MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 2, 0));
-            MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1));
+            //MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 2, 0));
+            MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 2, 1));
+            MeshExtensions.AddVertexAttribute(mesh, new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 2));
         
             discoverMesh = new DiscoverEffect(mesh);
             discoverMesh.DiscoverAllAdjacentTriangle();
             closestTriangle = new GetTriangle(mesh, meshFilter.transform);
             triangleHeight = new SeparateTriangleHeight(mesh);
+            compositer = new CompositeEffects(mesh);
+
+            compositer.input1 = discoverMesh.output;
         }
 
         void FixedUpdate()
@@ -42,7 +47,8 @@ namespace Bosmo
             {
                 discoverMesh.IncrementTriangles();
                 discoverMesh.DecayMesh();
-                triangleHeight.UpdateTriangles();
+                compositer.Compositing();
+                //triangleHeight.UpdateTriangles();
             }
             
         }

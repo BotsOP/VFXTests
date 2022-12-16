@@ -1,0 +1,43 @@
+#pragma kernel CompositeEffects
+
+RWByteAddressBuffer gpuVertices;
+ByteAddressBuffer gpuIndices;
+
+StructuredBuffer<float> input1;
+RWStructuredBuffer<float> startTime;
+
+int amountVerts;
+int vertexStride;
+float time;
+float effectDuration;
+
+[numthreads(128,1,1)]
+void CompositeEffects (uint3 id : SV_DispatchThreadID)
+{
+	if(id.x > (uint)amountVerts)
+	{
+		return;
+	}
+
+	if(input1[id.x] > 0 && startTime[id.x] == 0)
+	{
+		startTime[id.x] = time;
+	}
+
+	if(startTime[id.x] > 0)
+	{
+		float value = (time - startTime[id.x] + 0.0001) / effectDuration;
+		if(value > 0.5)
+		{
+			value = 1 - value;
+		}
+		value *= 2;
+		gpuVertices.Store(id.x * vertexStride, asuint(value));
+		
+		if(time - startTime[id.x] > effectDuration)
+		{
+			gpuVertices.Store(id.x * vertexStride, asuint(0));
+			startTime[id.x] = 0;
+		}
+	}
+}

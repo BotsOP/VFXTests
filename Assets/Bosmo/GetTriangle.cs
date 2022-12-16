@@ -21,6 +21,8 @@ namespace Bosmo
 
         private int amountTriangles => mesh.triangles.Length / 3;
 
+        
+
         public GetTriangle(Mesh mesh, Transform meshTransform, float distThreshold = 0.1f)
         {
             this.mesh = mesh;

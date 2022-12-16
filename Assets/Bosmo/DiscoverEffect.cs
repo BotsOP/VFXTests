@@ -6,7 +6,7 @@ namespace Bosmo
 {
     public class DiscoverEffect
     {
-        public int amountEffectsRunning => gpuAdjacentTrianglesIndexList.Count;
+        public ComputeBuffer output { get; }
         private ComputeShader discoverMeshShader;
         private int speed;
         private int speedWhenReverse;
@@ -19,6 +19,7 @@ namespace Bosmo
         private ComputeBuffer gpuAdjacentTriangle;
         private ComputeBuffer gpuTrianglesShouldCheck;
         private ComputeBuffer gpuAmountTrianglesToCheck;
+
 
         private List<ComputeBuffer> gpuAdjacentTrianglesIndexList;
         private List<ComputeBuffer> gpuTrianglesShouldCheckAppendList;
@@ -39,8 +40,9 @@ namespace Bosmo
         private int vertexStride;
         private AdjacentTriangles[] adjacentTrianglesArray;
         private int amountTriangles => mesh.triangles.Length / 3;
+        private int amountEffectsRunning => gpuAdjacentTrianglesIndexList.Count;
     
-        public DiscoverEffect(Mesh mesh, int speed = 1, float decaySpeed = 0.02f, int speedWhenReverse = 2, float timeUntilReverse = 0.5f, float timeDecayBeforeReverse = 0.75f)
+        public DiscoverEffect(Mesh mesh, int speed = 1, float decaySpeed = 1f, int speedWhenReverse = 2, float timeUntilReverse = 0.5f, float timeDecayBeforeReverse = 0.75f)
         {
             this.mesh = mesh;
             this.speed = speed;
@@ -62,6 +64,10 @@ namespace Bosmo
 
             gpuAdjacentTriangle = new ComputeBuffer(amountTriangles, sizeof(int) * 3, ComputeBufferType.Structured);
             gpuAmountTrianglesToCheck = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Structured);
+            output = new ComputeBuffer(mesh.vertexCount, sizeof(float), ComputeBufferType.Structured);
+
+            float[] empty = new float[mesh.vertexCount];
+            output.SetData(empty);
         }
 
         ~DiscoverEffect()
@@ -76,9 +82,15 @@ namespace Bosmo
             gpuTrianglesShouldCheck = null;
             gpuAmountTrianglesToCheck?.Dispose();
             gpuAmountTrianglesToCheck = null;
-        
-            //TODO
-            //set computebufferlists to release
+
+            foreach (var buffer in gpuAdjacentTrianglesIndexList)
+            {
+                buffer?.Release();
+            }
+            foreach (var buffer in gpuTrianglesShouldCheckAppendList)
+            {
+                buffer?.Release();
+            }
         }
     
         public void DiscoverAllAdjacentTriangle()
@@ -180,6 +192,7 @@ namespace Bosmo
                 discoverMeshShader.SetBuffer(kernelID, "gpuTrianglesShouldCheckAppend", gpuTrianglesShouldCheckAppendList[i]);
                 discoverMeshShader.SetBuffer(kernelID, "gpuAmountTrianglesToCheck", gpuAmountTrianglesToCheck);
                 discoverMeshShader.SetBuffer(kernelID, "gpuAdjacentTrianglesIndex", gpuAdjacentTrianglesIndexList[i]);
+                discoverMeshShader.SetBuffer(kernelID, "output", output);
                 discoverMeshShader.SetInt("amountTrianglesToCheck", amountTrianglesToCheckList[i]);
                 discoverMeshShader.SetBool("reverseDirection", shouldReverseDirection);
                 gpuTrianglesShouldCheckAppendList[i].SetCounterValue(0);
@@ -215,6 +228,7 @@ namespace Bosmo
             //const
             discoverMeshShader.SetBuffer(kernelID, "gpuVertices", gpuVertices);
             discoverMeshShader.SetBuffer(kernelID, "gpuIndices", gpuIndices);
+            discoverMeshShader.SetBuffer(kernelID, "output", output);
             discoverMeshShader.SetInt("amountVerts", mesh.vertexCount);
             //changes
             discoverMeshShader.SetFloat("decaySpeed", decaySpeed);

@@ -1,14 +1,6 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel FindClosestTriangle
 
-struct Vertex
-{
-    float3 pos;
-    float3 nor;
-    float4 tang;
-    float uvx;
-    float uvy;
-};
 
 struct TriangleInProximity
 {
@@ -38,9 +30,9 @@ void FindClosestTriangle (uint3 id : SV_DispatchThreadID)
     uint index2 = gpuIndices.Load((id.x * 3 + 1) * 4);
     uint index3 = gpuIndices.Load((id.x * 3 + 2) * 4);
     
-    float3 vertex1 = asfloat(gpuVertices.Load3(index1 * 48));
-    float3 vertex2 = asfloat(gpuVertices.Load3(index2 * 48));
-    float3 vertex3 = asfloat(gpuVertices.Load3(index3 * 48));
+    float3 vertex1 = asfloat(gpuVertices.Load3(index1 * vertexStride));
+    float3 vertex2 = asfloat(gpuVertices.Load3(index2 * vertexStride));
+    float3 vertex3 = asfloat(gpuVertices.Load3(index3 * vertexStride));
     
     float3 avgPos = (vertex1 + vertex2 + vertex3) / 3;
     float dist = distance(avgPos, hitPos);
