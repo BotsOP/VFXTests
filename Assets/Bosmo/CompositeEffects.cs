@@ -60,7 +60,7 @@ public class CompositeEffects
         compositeShader.SetInt("vertexStride", vertexStride);
         compositeShader.SetInt("amountVerts", mesh.vertexCount);
         compositeShader.SetFloat("time", Time.time);
-        compositeShader.SetFloat("effectDuration", 0.5f);
+        compositeShader.SetFloat("effectDuration", 1f);
         compositeShader.Dispatch(kernelID, threadGroupSize, 1, 1);
     }
 }

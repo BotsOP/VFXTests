@@ -48,7 +48,7 @@ namespace Bosmo
                 discoverMesh.IncrementTriangles();
                 discoverMesh.DecayMesh();
                 compositer.Compositing();
-                //triangleHeight.UpdateTriangles();
+                triangleHeight.UpdateTriangles();
             }
             
         }

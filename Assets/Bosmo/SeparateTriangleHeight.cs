@@ -8,6 +8,7 @@ namespace Bosmo
         private Mesh mesh;
         
         private GraphicsBuffer gpuVertices;
+        private GraphicsBuffer gpuUVs;
         private GraphicsBuffer gpuIndices;
         private ComputeBuffer gpuOldVertices;
         
@@ -40,12 +41,16 @@ namespace Bosmo
         public void UpdateTriangles()
         {
             gpuVertices ??= mesh.GetVertexBuffer(0);
+            gpuUVs ??= mesh.GetVertexBuffer(1);
             gpuIndices ??= mesh.GetIndexBuffer();
-            
+
             separateTriangleHeightShader.SetBuffer(kernelID,"gpuVertices", gpuVertices);
             separateTriangleHeightShader.SetBuffer(kernelID,"gpuIndices", gpuIndices);
             separateTriangleHeightShader.SetBuffer(kernelID,"gpuOldVertices", gpuOldVertices);
+            separateTriangleHeightShader.SetBuffer(kernelID,"gpuUVs", gpuUVs);
             separateTriangleHeightShader.SetInt("amountTriangles", amountTriangles);
+            separateTriangleHeightShader.SetInt("vertexStride", mesh.GetVertexBufferStride(0));
+            separateTriangleHeightShader.SetInt("uvStride", mesh.GetVertexBufferStride(1));
             separateTriangleHeightShader.Dispatch(kernelID, threadGroupSize, 1, 1);
         }
     }
